@@ -50,12 +50,12 @@ export default function AuthPage() {
           </div>
 
           {/* Role Toggle Switch */}
-          <div className="flex mx-auto w-fit p-1 bg-gray-100/80 rounded-full mb-8 border border-gray-200/50">
+          <div className="flex mx-auto w-fit p-1 bg-gray-100/80 rounded-[15%] mb-8 border border-gray-200/50">
             <button
               type="button"
               onClick={() => form.setValue("role", "employee")}
               className={cn(
-                "px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300",
+                "px-6 py-2 rounded-[15%] text-sm font-semibold transition-all duration-300",
                 currentRole === "employee"
                   ? "bg-white text-[#4A90D9] shadow-sm"
                   : "text-gray-500 hover:text-gray-700"
@@ -67,7 +67,7 @@ export default function AuthPage() {
               type="button"
               onClick={() => form.setValue("role", "client")}
               className={cn(
-                "px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300",
+                "px-6 py-2 rounded-[15%] text-sm font-semibold transition-all duration-300",
                 currentRole === "client"
                   ? "bg-white text-[#4A90D9] shadow-sm"
                   : "text-gray-500 hover:text-gray-700"
@@ -221,12 +221,13 @@ export default function AuthPage() {
             </button>
           </div>
 
+          {/* Footer inside the white box */}
+          <p className="mt-8 text-center text-xs text-gray-500">
+            Need help? Contact your account manager
+          </p>
+
         </div>
 
-        {/* Footer */}
-        <p className="mt-8 text-center text-xs text-gray-500">
-          Need help? Contact your account manager
-        </p>
       </div>
     </div>
   );
