@@ -41,11 +41,11 @@ export default function AuthPage() {
         <div className="bg-white py-10 px-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:rounded-2xl border border-gray-100/50">
           
           {/* Logo */}
-          <div className="mb-8">
+          <div className="mb-8 text-center">
             <img 
               src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTKVW_LlI3J3jD3Iet9soKQKB4Kbyk7qZINPw&s" 
               alt="Company Logo" 
-              className="h-12 mx-auto object-contain"
+              className="h-16 w-16 mx-auto object-contain"
             />
           </div>
 
@@ -162,16 +162,18 @@ export default function AuthPage() {
               )}
             </div>
 
-            {/* Forgot Password Link */}
-            <div className="flex items-center justify-end">
-              <a 
-                href="#" 
-                className="text-sm font-medium text-[#4A90D9] hover:text-[#3876b5] transition-colors"
-                onClick={(e) => e.preventDefault()}
-              >
-                Forgot Password?
-              </a>
-            </div>
+            {/* Forgot Password Link (Hidden for Employees) */}
+            {currentRole !== "employee" && (
+              <div className="flex items-center justify-end">
+                <a 
+                  href="#" 
+                  className="text-sm font-medium text-[#4A90D9] hover:text-[#3876b5] transition-colors"
+                  onClick={(e) => e.preventDefault()}
+                >
+                  Forgot Password?
+                </a>
+              </div>
+            )}
 
             {/* Sign In Button */}
             <button
