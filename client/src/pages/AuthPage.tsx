@@ -6,6 +6,7 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import { useLogin } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
+import { useLocation } from "wouter";
 
 type LoginFormValues = z.infer<typeof api.auth.login.input>;
 
@@ -13,6 +14,7 @@ export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
   
   const loginMutation = useLogin();
+  const [, setLocation] = useLocation();
   
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(api.auth.login.input),
@@ -26,7 +28,11 @@ export default function AuthPage() {
   const currentRole = form.watch("role");
 
   const onSubmit = (data: LoginFormValues) => {
-    loginMutation.mutate(data);
+    loginMutation.mutate(data, {
+      onSuccess: () => {
+        setLocation("/profile");
+      }
+    });
   };
 
   const handleMicrosoftLogin = () => {
