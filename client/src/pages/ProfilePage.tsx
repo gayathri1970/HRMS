@@ -35,8 +35,10 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-[#F0F2F5] font-sans">
       {/* Header */}
       <header className="bg-[#003B5C] text-white h-16 flex items-center justify-between px-6 sticky top-0 z-50 shadow-md">
-        <div className="flex items-center gap-4">
-          <img src={logoUrl} alt="Logo" className="h-10 w-10 rounded-sm bg-white" />
+        <div className="flex items-center gap-4 h-full">
+          <div className="h-full flex items-center">
+            <img src={logoUrl} alt="Logo" className="h-10 w-10 rounded-sm bg-white object-contain" />
+          </div>
           <h1 className="text-xl font-semibold tracking-wide">Profile</h1>
         </div>
         <div className="flex items-center gap-3">
@@ -49,20 +51,20 @@ export default function ProfilePage() {
 
       <div className="flex">
         {/* Sidebar */}
-        <aside className="w-20 bg-[#003B5C] min-h-[calc(100vh-4rem)] flex flex-col items-center py-6 gap-8 border-t border-white/10">
-          <div className="flex flex-col items-center gap-1 group cursor-pointer opacity-100">
-            <div className="p-2 rounded-lg bg-white/10">
-              <User className="h-6 w-6 text-white" />
+        <aside className="w-20 bg-white min-h-[calc(100vh-4rem)] flex flex-col items-center py-6 gap-8 border-r border-gray-200 shadow-sm">
+          <div className="flex flex-col items-center gap-1 group cursor-pointer">
+            <div className="p-2 rounded-lg bg-[#003B5C]/10">
+              <User className="h-6 w-6 text-[#003B5C]" />
             </div>
-            <span className="text-[10px] text-white font-medium uppercase tracking-tighter">Profile</span>
+            <span className="text-[10px] text-[#003B5C] font-semibold uppercase tracking-tighter">Profile</span>
           </div>
-          <div className="flex flex-col items-center gap-1 group cursor-pointer opacity-60 hover:opacity-100 transition-opacity">
-            <Briefcase className="h-6 w-6 text-white" />
-            <span className="text-[10px] text-white font-medium uppercase tracking-tighter">Timesheet</span>
+          <div className="flex flex-col items-center gap-1 group cursor-pointer opacity-40 hover:opacity-100 transition-opacity">
+            <Briefcase className="h-6 w-6 text-[#003B5C]" />
+            <span className="text-[10px] text-[#003B5C] font-medium uppercase tracking-tighter">Timesheet</span>
           </div>
-          <div className="flex flex-col items-center gap-1 group cursor-pointer opacity-60 hover:opacity-100 transition-opacity">
-            <FileText className="h-6 w-6 text-white" />
-            <span className="text-[10px] text-white font-medium uppercase tracking-tighter">Leaves</span>
+          <div className="flex flex-col items-center gap-1 group cursor-pointer opacity-40 hover:opacity-100 transition-opacity">
+            <FileText className="h-6 w-6 text-[#003B5C]" />
+            <span className="text-[10px] text-[#003B5C] font-medium uppercase tracking-tighter">Leaves</span>
           </div>
         </aside>
 
