@@ -28,11 +28,30 @@ import {
 
 export default function ProfilePage() {
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
-  
+  const fileInputRef = useState<HTMLInputElement | null>(null)[0]; // Placeholder for logic
   const logoUrl = "https://media.licdn.com/dms/image/v2/D560BAQGcR7_HwEkKmA/company-logo_200_200/company-logo_200_200/0/1699232615152/novintix_logo?e=2147483647&v=beta&t=3XAk48qckTMdWC62Op9WZpvM-tYNKPth5DU6yrYIk60";
+
+  const handleUploadClick = () => {
+    document.getElementById('resume-upload')?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      console.log("Selected file:", file.name);
+      // Here you would typically upload the file to your server
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#F0F2F5] font-sans">
+      <input
+        type="file"
+        id="resume-upload"
+        className="hidden"
+        onChange={handleFileChange}
+        accept=".pdf,.doc,.docx"
+      />
       {/* Header */}
       <header className="bg-[#003B5C] text-white h-16 flex items-center justify-between px-6 sticky top-0 z-50 shadow-md">
         <div className="flex items-center gap-4 h-full">
@@ -99,7 +118,12 @@ export default function ProfilePage() {
                 <span className="font-semibold text-gray-800">Resume</span>
               </div>
               <div className="flex gap-2">
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]"
+                  onClick={handleUploadClick}
+                >
                   <Upload className="h-4 w-4" />
                 </Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400">
