@@ -23,7 +23,8 @@ import {
   Heart,
   Shield,
   BookOpen,
-  Users
+  Users,
+  Pencil
 } from "lucide-react";
 
 export default function ProfilePage() {
@@ -159,8 +160,8 @@ export default function ProfilePage() {
             <Card className="p-6 border-none shadow-sm rounded-xl relative">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-gray-800">Basic Details</h3>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400">
-                  <FileText className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]">
+                  <Pencil className="h-4 w-4" />
                 </Button>
               </div>
               <div className="grid grid-cols-2 gap-y-4 text-xs">
@@ -203,8 +204,8 @@ export default function ProfilePage() {
             <Card className="p-6 border-none shadow-sm rounded-xl">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-gray-800">Contact Information</h3>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400">
-                  <FileText className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]">
+                  <Pencil className="h-4 w-4" />
                 </Button>
               </div>
               <div className="space-y-4 text-xs">
@@ -230,8 +231,8 @@ export default function ProfilePage() {
             <Card className="p-6 border-none shadow-sm rounded-xl flex flex-col h-48">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-gray-800">About Employee</h3>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400">
-                  <FileText className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]">
+                  <Pencil className="h-4 w-4" />
                 </Button>
               </div>
               <p className="text-gray-400 text-sm">-</p>
@@ -241,8 +242,8 @@ export default function ProfilePage() {
             <Card className="p-6 border-none shadow-sm rounded-xl">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-gray-800">Address Details</h3>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400">
-                  <FileText className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]">
+                  <Pencil className="h-4 w-4" />
                 </Button>
               </div>
               <div className="grid grid-cols-2 gap-y-6 text-xs">
@@ -402,8 +403,8 @@ export default function ProfilePage() {
             <Card className="p-6 border-none shadow-sm rounded-xl">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-gray-800">Education Documents</h3>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400">
-                  <FileText className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]">
+                  <Pencil className="h-4 w-4" />
                 </Button>
               </div>
               <div className="space-y-6 text-xs">
