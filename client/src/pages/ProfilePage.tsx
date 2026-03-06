@@ -28,6 +28,7 @@ import {
 
 export default function ProfilePage() {
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const fileInputRef = useState<HTMLInputElement | null>(null)[0]; // Placeholder for logic
   const logoUrl = "https://media.licdn.com/dms/image/v2/D560BAQGcR7_HwEkKmA/company-logo_200_200/company-logo_200_200/0/1699232615152/novintix_logo?e=2147483647&v=beta&t=3XAk48qckTMdWC62Op9WZpvM-tYNKPth5DU6yrYIk60";
 
@@ -38,8 +39,21 @@ export default function ProfilePage() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setUploadedFile(file);
       console.log("Selected file:", file.name);
-      // Here you would typically upload the file to your server
+    }
+  };
+
+  const handleDownloadClick = () => {
+    if (uploadedFile) {
+      const url = URL.createObjectURL(uploadedFile);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = uploadedFile.name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     }
   };
 
@@ -126,7 +140,16 @@ export default function ProfilePage() {
                 >
                   <Upload className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className={cn(
+                    "h-8 w-8 transition-colors",
+                    uploadedFile ? "text-[#00AEEF] hover:text-[#003B5C]" : "text-gray-400 cursor-not-allowed"
+                  )}
+                  onClick={handleDownloadClick}
+                  disabled={!uploadedFile}
+                >
                   <Download className="h-4 w-4" />
                 </Button>
               </div>
