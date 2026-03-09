@@ -60,7 +60,12 @@ export default function AuthPage() {
             <button
               type="button"
               onClick={() => form.setValue("role", "employee")}
-              className="px-6 py-2 rounded-[0.5rem] text-sm font-semibold transition-all duration-300 shadow-sm text-[#4a90d9] bg-[#ffffff]"
+              className={cn(
+                "px-6 py-2 rounded-[0.5rem] text-sm font-semibold transition-all duration-300",
+                currentRole === "employee"
+                  ? "bg-white text-[#4A90D9] shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
+              )}
             >
               Employee
             </button>

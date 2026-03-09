@@ -33,6 +33,39 @@ export default function ProfilePage() {
   const fileInputRef = useState<HTMLInputElement | null>(null)[0]; // Placeholder for logic
   const logoUrl = "https://media.licdn.com/dms/image/v2/D560BAQGcR7_HwEkKmA/company-logo_200_200/company-logo_200_200/0/1699232615152/novintix_logo?e=2147483647&v=beta&t=3XAk48qckTMdWC62Op9WZpvM-tYNKPth5DU6yrYIk60";
 
+  // Edit mode states
+  const [editingBasicDetails, setEditingBasicDetails] = useState(false);
+  const [editingContactInfo, setEditingContactInfo] = useState(false);
+  const [editingAbout, setEditingAbout] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(false);
+  const [editingEducation, setEditingEducation] = useState(false);
+
+  // Form data states
+  const [basicDetails, setBasicDetails] = useState({
+    employeeId: "",
+    firstName: "",
+    lastName: "",
+    dateOfBirth: "",
+    dateOfJoining: "",
+    nationality: "",
+    religion: "",
+    maritalStatus: ""
+  });
+  const [contactInfo, setContactInfo] = useState({
+    mobileNumber: "",
+    personalEmail: "",
+    emergencyContact: ""
+  });
+  const [aboutText, setAboutText] = useState("");
+  const [addressInfo, setAddressInfo] = useState({
+    address: "",
+    city: "",
+    state: "",
+    country: "",
+    pincode: "",
+    workLocation: ""
+  });
+
   const handleUploadClick = () => {
     document.getElementById('resume-upload')?.click();
   };
@@ -160,68 +193,212 @@ export default function ProfilePage() {
             <Card className="p-6 border-none shadow-sm rounded-xl relative">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-gray-800">Basic Details</h3>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]"
+                  onClick={() => setEditingBasicDetails(!editingBasicDetails)}
+                >
                   <Pencil className="h-4 w-4" />
                 </Button>
               </div>
-              <div className="grid grid-cols-2 gap-y-4 text-xs">
-                <div>
-                  <p className="text-gray-400 uppercase mb-1">Employee ID</p>
-                  <p className="font-medium text-gray-700">-</p>
+              {editingBasicDetails ? (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-xs uppercase mb-2 block">Employee ID</Label>
+                    <Input 
+                      value={basicDetails.employeeId}
+                      onChange={(e) => setBasicDetails({...basicDetails, employeeId: e.target.value})}
+                      placeholder="Enter Employee ID"
+                      disabled
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs uppercase mb-2 block">First Name</Label>
+                    <Input 
+                      value={basicDetails.firstName}
+                      onChange={(e) => setBasicDetails({...basicDetails, firstName: e.target.value})}
+                      placeholder="Enter First Name"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs uppercase mb-2 block">Last Name</Label>
+                    <Input 
+                      value={basicDetails.lastName}
+                      onChange={(e) => setBasicDetails({...basicDetails, lastName: e.target.value})}
+                      placeholder="Enter Last Name"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs uppercase mb-2 block">Date of Joining</Label>
+                    <Input 
+                      type="date"
+                      value={basicDetails.dateOfJoining}
+                      onChange={(e) => setBasicDetails({...basicDetails, dateOfJoining: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs uppercase mb-2 block">Nationality</Label>
+                    <Input 
+                      value={basicDetails.nationality}
+                      onChange={(e) => setBasicDetails({...basicDetails, nationality: e.target.value})}
+                      placeholder="Enter Nationality"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs uppercase mb-2 block">Date of Birth</Label>
+                    <Input 
+                      type="date"
+                      value={basicDetails.dateOfBirth}
+                      onChange={(e) => setBasicDetails({...basicDetails, dateOfBirth: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs uppercase mb-2 block">Marital Status</Label>
+                    <Input 
+                      value={basicDetails.maritalStatus}
+                      onChange={(e) => setBasicDetails({...basicDetails, maritalStatus: e.target.value})}
+                      placeholder="Enter Marital Status"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs uppercase mb-2 block">Religion</Label>
+                    <Input 
+                      value={basicDetails.religion}
+                      onChange={(e) => setBasicDetails({...basicDetails, religion: e.target.value})}
+                      placeholder="Enter Religion"
+                    />
+                  </div>
+                  <div className="col-span-2 flex gap-2">
+                    <Button 
+                      size="sm" 
+                      className="bg-[#00AEEF] hover:bg-[#003B5C] flex-1"
+                      onClick={() => setEditingBasicDetails(false)}
+                    >
+                      Save
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => setEditingBasicDetails(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-gray-400 uppercase mb-1">First Name</p>
-                  <p className="font-medium text-gray-700">-</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-y-4 text-xs">
+                  <div>
+                    <p className="text-gray-400 uppercase mb-1">Employee ID</p>
+                    <p className="font-medium text-gray-700">{basicDetails.employeeId || "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 uppercase mb-1">First Name</p>
+                    <p className="font-medium text-gray-700">{basicDetails.firstName || "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 uppercase mb-1">Last Name</p>
+                    <p className="font-medium text-gray-700">{basicDetails.lastName || "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 uppercase mb-1">Date of Joining</p>
+                    <p className="font-medium text-gray-700">{basicDetails.dateOfJoining || "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 uppercase mb-1">Nationality</p>
+                    <p className="font-medium text-gray-700">{basicDetails.nationality || "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 uppercase mb-1">Date of Birth</p>
+                    <p className="font-medium text-gray-700">{basicDetails.dateOfBirth || "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 uppercase mb-1">Marital Status</p>
+                    <p className="font-medium text-gray-700">{basicDetails.maritalStatus || "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 uppercase mb-1">Religion</p>
+                    <p className="font-medium text-gray-700">{basicDetails.religion || "-"}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-gray-400 uppercase mb-1">Last Name</p>
-                  <p className="font-medium text-gray-700">-</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 uppercase mb-1">Date of Joining</p>
-                  <p className="font-medium text-gray-700">-</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 uppercase mb-1">Nationality</p>
-                  <p className="font-medium text-gray-700">-</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 uppercase mb-1">Date of Birth</p>
-                  <p className="font-medium text-gray-700">-</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 uppercase mb-1">Marital Status</p>
-                  <p className="font-medium text-gray-700">-</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 uppercase mb-1">Religion</p>
-                  <p className="font-medium text-gray-700">-</p>
-                </div>
-              </div>
+              )}
             </Card>
 
             {/* Contact Information */}
             <Card className="p-6 border-none shadow-sm rounded-xl">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-gray-800">Contact Information</h3>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]"
+                  onClick={() => setEditingContactInfo(!editingContactInfo)}
+                >
                   <Pencil className="h-4 w-4" />
                 </Button>
               </div>
-              <div className="space-y-4 text-xs">
-                <div>
-                  <p className="text-gray-400 uppercase mb-1">Mobile Number</p>
-                  <p className="font-medium text-gray-700">-</p>
+              {editingContactInfo ? (
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-xs uppercase mb-2 block">Mobile Number</Label>
+                    <Input 
+                      value={contactInfo.mobileNumber}
+                      onChange={(e) => setContactInfo({...contactInfo, mobileNumber: e.target.value})}
+                      placeholder="Enter Mobile Number"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs uppercase mb-2 block">Personal Email ID</Label>
+                    <Input 
+                      type="email"
+                      value={contactInfo.personalEmail}
+                      onChange={(e) => setContactInfo({...contactInfo, personalEmail: e.target.value})}
+                      placeholder="Enter Email"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs uppercase mb-2 block">Emergency Contact</Label>
+                    <Input 
+                      value={contactInfo.emergencyContact}
+                      onChange={(e) => setContactInfo({...contactInfo, emergencyContact: e.target.value})}
+                      placeholder="Enter Emergency Contact"
+                    />
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <Button 
+                      size="sm" 
+                      className="bg-[#00AEEF] hover:bg-[#003B5C] flex-1"
+                      onClick={() => setEditingContactInfo(false)}
+                    >
+                      Save
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => setEditingContactInfo(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-gray-400 uppercase mb-1">Personal Email ID</p>
-                  <p className="font-medium text-gray-700">-</p>
+              ) : (
+                <div className="space-y-4 text-xs">
+                  <div>
+                    <p className="text-gray-400 uppercase mb-1">Mobile Number</p>
+                    <p className="font-medium text-gray-700">{contactInfo.mobileNumber || "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 uppercase mb-1">Personal Email ID</p>
+                    <p className="font-medium text-gray-700">{contactInfo.personalEmail || "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 uppercase mb-1">Emergency Contact</p>
+                    <p className="font-medium text-gray-700">{contactInfo.emergencyContact || "-"}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-gray-400 uppercase mb-1">Emergency Contact</p>
-                  <p className="font-medium text-gray-700">-</p>
-                </div>
-              </div>
+              )}
             </Card>
           </div>
 
