@@ -14,7 +14,6 @@ import {
   Phone,
   MapPin,
   Briefcase,
-  CreditCard,
   FileText,
   Upload,
   Download,
@@ -26,13 +25,27 @@ import {
   BookOpen,
   Users,
   Pencil,
+  ClipboardList,
+  Monitor,
+  LogOut,
 } from "lucide-react";
+import { useLocation, Link } from "wouter";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export default function ProfilePage() {
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const fileInputRef = useState<HTMLInputElement | null>(null)[0]; // Placeholder for logic
-  
+  const [location, setLocation] = useLocation();
+
+  // Logout handler
+  const handleLogout = () => {
+    setLocation("/");
+  };
+
   // Edit mode states
   const [editingBasicDetails, setEditingBasicDetails] = useState(false);
   const [editingContactInfo, setEditingContactInfo] = useState(false);
@@ -113,36 +126,165 @@ export default function ProfilePage() {
           <h1 className="text-xl font-semibold tracking-wide">Profile</h1>
         </div>
         <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10 border-2 border-white/20">
-            <AvatarImage src={profilePhoto || ""} />
-            <AvatarFallback className="bg-white text-[#003B5C] font-bold">
-              GP
-            </AvatarFallback>
-          </Avatar>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Avatar className="h-10 w-10 border-2 border-white/20 cursor-pointer hover:opacity-80 transition-opacity">
+                <AvatarImage src={profilePhoto || ""} />
+                <AvatarFallback className="bg-white text-[#003B5C] font-bold">
+                  GP
+                </AvatarFallback>
+              </Avatar>
+            </PopoverTrigger>
+            <PopoverContent className="w-56 p-0 mt-2 border-none shadow-xl rounded-xl overflow-hidden">
+              <div className="bg-[#003B5C] p-4 text-white">
+                <p className="font-bold text-sm">Gayathri Palani</p>
+                <p className="text-xs opacity-80">AI Intern</p>
+              </div>
+              <div className="p-1 bg-white">
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </header>
 
       <div className="flex">
         {/* Sidebar */}
         <aside className="w-20 bg-white min-h-[calc(100vh-4rem)] flex flex-col items-center py-6 gap-8 border-r border-gray-200 shadow-sm">
-          <div className="flex flex-col items-center gap-1 group cursor-pointer">
-            <div className="p-2 rounded-lg bg-[#003B5C]/10">
-              <User className="h-6 w-6 text-[#003B5C]" />
+          <Link href="/profile">
+            <div
+              className={cn(
+                "flex flex-col items-center gap-1 group cursor-pointer",
+                location === "/profile"
+                  ? "opacity-100"
+                  : "opacity-40 hover:opacity-100 transition-opacity",
+              )}
+            >
+              <div
+                className={cn(
+                  "p-2 rounded-lg",
+                  location === "/profile"
+                    ? "bg-[#003B5C]/10"
+                    : "group-hover:bg-[#003B5C]/5",
+                )}
+              >
+                <User
+                  className={cn(
+                    "h-6 w-6",
+                    location === "/profile"
+                      ? "text-[#003B5C]"
+                      : "text-gray-500 group-hover:text-[#003B5C]",
+                  )}
+                />
+              </div>
+              <span
+                className={cn(
+                  "text-[10px] font-semibold uppercase tracking-tighter",
+                  location === "/profile"
+                    ? "text-[#003B5C]"
+                    : "text-gray-400 group-hover:text-[#003B5C]",
+                )}
+              >
+                Profile
+              </span>
             </div>
-            <span className="text-[10px] text-[#003B5C] font-semibold uppercase tracking-tighter">
-              Profile
-            </span>
-          </div>
+          </Link>
+
           <div className="flex flex-col items-center gap-1 group cursor-pointer opacity-40 hover:opacity-100 transition-opacity">
             <Briefcase className="h-6 w-6 text-[#003B5C]" />
-            <span className="text-[10px] text-[#003B5C] font-medium uppercase tracking-tighter">
+            <span className="text-[10px] text-[#003B5C] font-medium uppercase tracking-tighter text-center">
               Timesheet
             </span>
           </div>
+
+          <Link href="/leave-request">
+            <div
+              className={cn(
+                "flex flex-col items-center gap-1 group cursor-pointer",
+                location === "/leave-request"
+                  ? "opacity-100"
+                  : "opacity-40 hover:opacity-100 transition-opacity",
+              )}
+            >
+              <div
+                className={cn(
+                  "p-2 rounded-lg",
+                  location === "/leave-request"
+                    ? "bg-[#003B5C]/10"
+                    : "group-hover:bg-[#003B5C]/5",
+                )}
+              >
+                <ClipboardList
+                  className={cn(
+                    "h-6 w-6",
+                    location === "/leave-request"
+                      ? "text-[#003B5C]"
+                      : "text-gray-500 group-hover:text-[#003B5C]",
+                  )}
+                />
+              </div>
+              <span
+                className={cn(
+                  "text-[10px] font-semibold uppercase tracking-tighter text-center",
+                  location === "/leave-request"
+                    ? "text-[#003B5C]"
+                    : "text-gray-400 group-hover:text-[#003B5C]",
+                )}
+              >
+                Leave Request
+              </span>
+            </div>
+          </Link>
+
+          <Link href="/asset-request">
+            <div
+              className={cn(
+                "flex flex-col items-center gap-1 group cursor-pointer",
+                location === "/asset-request"
+                  ? "opacity-100"
+                  : "opacity-40 hover:opacity-100 transition-opacity",
+              )}
+            >
+              <div
+                className={cn(
+                  "p-2 rounded-lg",
+                  location === "/asset-request"
+                    ? "bg-[#003B5C]/10"
+                    : "group-hover:bg-[#003B5C]/5",
+                )}
+              >
+                <Monitor
+                  className={cn(
+                    "h-6 w-6",
+                    location === "/asset-request"
+                      ? "text-[#003B5C]"
+                      : "text-gray-500 group-hover:text-[#003B5C]",
+                  )}
+                />
+              </div>
+              <span
+                className={cn(
+                  "text-[10px] font-semibold uppercase tracking-tighter text-center",
+                  location === "/asset-request"
+                    ? "text-[#003B5C]"
+                    : "text-gray-400 group-hover:text-[#003B5C]",
+                )}
+              >
+                Asset Request
+              </span>
+            </div>
+          </Link>
+
           <div className="flex flex-col items-center gap-1 group cursor-pointer opacity-40 hover:opacity-100 transition-opacity">
             <FileText className="h-6 w-6 text-[#003B5C]" />
             <span className="text-[10px] text-[#003B5C] font-medium uppercase tracking-tighter">
-              Leaves
+              Policy
             </span>
           </div>
         </aside>
@@ -757,13 +899,13 @@ export default function ProfilePage() {
                   <p className="font-medium text-gray-700">-</p>
                 </div>
                 <div className="grid grid-cols-1 gap-4">
-                  <div className="p-4 border border-dashed border-gray-200 rounded-lg flex items-center justify-center gap-2 cursor-pointer hover:bg-gray-50 transition-colors">
-                    <Upload className="h-4 w-4 text-gray-400" />
-                    <span className="text-gray-400">Schooling Certificate</span>
+                  <div className="p-4 border border-dashed border-gray-200 rounded-lg flex items-center justify-center gap-2 cursor-pointer hover:bg-gray-50 transition-colors text-gray-400">
+                    <Upload className="h-4 w-4" />
+                    <span>Schooling Certificate</span>
                   </div>
-                  <div className="p-4 border border-dashed border-gray-200 rounded-lg flex items-center justify-center gap-2 cursor-pointer hover:bg-gray-50 transition-colors">
-                    <Upload className="h-4 w-4 text-gray-400" />
-                    <span className="text-gray-400">UG Degree Certificate</span>
+                  <div className="p-4 border border-dashed border-gray-200 rounded-lg flex items-center justify-center gap-2 cursor-pointer hover:bg-gray-50 transition-colors text-gray-400">
+                    <Upload className="h-4 w-4" />
+                    <span>UG Degree Certificate</span>
                   </div>
                 </div>
               </div>
