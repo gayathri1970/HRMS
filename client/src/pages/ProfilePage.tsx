@@ -1,3 +1,4 @@
+import logoUrl from "@assets/novintix_1773119222458.jpeg";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
@@ -7,15 +8,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Briefcase, 
-  CreditCard, 
-  FileText, 
-  Upload, 
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Briefcase,
+  CreditCard,
+  FileText,
+  Upload,
   Download,
   Plus,
   Trash2,
@@ -24,15 +25,14 @@ import {
   Shield,
   BookOpen,
   Users,
-  Pencil
+  Pencil,
 } from "lucide-react";
 
 export default function ProfilePage() {
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const fileInputRef = useState<HTMLInputElement | null>(null)[0]; // Placeholder for logic
-  const logoUrl = "https://media.licdn.com/dms/image/v2/D560BAQGcR7_HwEkKmA/company-logo_200_200/company-logo_200_200/0/1699232615152/novintix_logo?e=2147483647&v=beta&t=3XAk48qckTMdWC62Op9WZpvM-tYNKPth5DU6yrYIk60";
-
+  
   // Edit mode states
   const [editingBasicDetails, setEditingBasicDetails] = useState(false);
   const [editingContactInfo, setEditingContactInfo] = useState(false);
@@ -49,12 +49,12 @@ export default function ProfilePage() {
     dateOfJoining: "",
     nationality: "",
     religion: "",
-    maritalStatus: ""
+    maritalStatus: "",
   });
   const [contactInfo, setContactInfo] = useState({
     mobileNumber: "",
     personalEmail: "",
-    emergencyContact: ""
+    emergencyContact: "",
   });
   const [aboutText, setAboutText] = useState("");
   const [addressInfo, setAddressInfo] = useState({
@@ -63,11 +63,11 @@ export default function ProfilePage() {
     state: "",
     country: "",
     pincode: "",
-    workLocation: ""
+    workLocation: "",
   });
 
   const handleUploadClick = () => {
-    document.getElementById('resume-upload')?.click();
+    document.getElementById("resume-upload")?.click();
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,7 +81,7 @@ export default function ProfilePage() {
   const handleDownloadClick = () => {
     if (uploadedFile) {
       const url = URL.createObjectURL(uploadedFile);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = uploadedFile.name;
       document.body.appendChild(link);
@@ -104,14 +104,20 @@ export default function ProfilePage() {
       <header className="bg-[#003B5C] text-white h-16 flex items-center justify-between px-6 sticky top-0 z-50 shadow-md">
         <div className="flex items-center gap-4 h-full">
           <div className="h-full flex items-center">
-            <img src={logoUrl} alt="Logo" className="h-10 w-10 rounded-sm bg-white object-contain" />
+            <img
+              src={logoUrl}
+              alt="Logo"
+              className="h-10 w-10 rounded-sm bg-white object-contain"
+            />
           </div>
           <h1 className="text-xl font-semibold tracking-wide">Profile</h1>
         </div>
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10 border-2 border-white/20">
             <AvatarImage src={profilePhoto || ""} />
-            <AvatarFallback className="bg-white text-[#003B5C] font-bold">GP</AvatarFallback>
+            <AvatarFallback className="bg-white text-[#003B5C] font-bold">
+              GP
+            </AvatarFallback>
           </Avatar>
         </div>
       </header>
@@ -123,21 +129,26 @@ export default function ProfilePage() {
             <div className="p-2 rounded-lg bg-[#003B5C]/10">
               <User className="h-6 w-6 text-[#003B5C]" />
             </div>
-            <span className="text-[10px] text-[#003B5C] font-semibold uppercase tracking-tighter">Profile</span>
+            <span className="text-[10px] text-[#003B5C] font-semibold uppercase tracking-tighter">
+              Profile
+            </span>
           </div>
           <div className="flex flex-col items-center gap-1 group cursor-pointer opacity-40 hover:opacity-100 transition-opacity">
             <Briefcase className="h-6 w-6 text-[#003B5C]" />
-            <span className="text-[10px] text-[#003B5C] font-medium uppercase tracking-tighter">Timesheet</span>
+            <span className="text-[10px] text-[#003B5C] font-medium uppercase tracking-tighter">
+              Timesheet
+            </span>
           </div>
           <div className="flex flex-col items-center gap-1 group cursor-pointer opacity-40 hover:opacity-100 transition-opacity">
             <FileText className="h-6 w-6 text-[#003B5C]" />
-            <span className="text-[10px] text-[#003B5C] font-medium uppercase tracking-tighter">Leaves</span>
+            <span className="text-[10px] text-[#003B5C] font-medium uppercase tracking-tighter">
+              Leaves
+            </span>
           </div>
         </aside>
 
         {/* Main Content */}
         <main className="flex-1 p-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
-          
           {/* Left Column */}
           <div className="lg:col-span-4 flex flex-col gap-6">
             {/* Main Profile Card */}
@@ -150,7 +161,9 @@ export default function ProfilePage() {
                     <User className="h-16 w-16" />
                   </AvatarFallback>
                 </Avatar>
-                <h2 className="text-xl font-bold text-gray-900">Gayathri Palani</h2>
+                <h2 className="text-xl font-bold text-gray-900">
+                  Gayathri Palani
+                </h2>
                 <p className="text-[#00AEEF] bg-[#E1F5FE] px-4 py-1 rounded-full text-xs font-semibold mt-2">
                   AI Intern
                 </p>
@@ -166,20 +179,22 @@ export default function ProfilePage() {
                 <span className="font-semibold text-gray-800">Resume</span>
               </div>
               <div className="flex gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
+                <Button
+                  variant="ghost"
+                  size="icon"
                   className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]"
                   onClick={handleUploadClick}
                 >
                   <Upload className="h-4 w-4" />
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
+                <Button
+                  variant="ghost"
+                  size="icon"
                   className={cn(
                     "h-8 w-8 transition-colors",
-                    uploadedFile ? "text-[#00AEEF] hover:text-[#003B5C]" : "text-gray-400 cursor-not-allowed"
+                    uploadedFile
+                      ? "text-[#00AEEF] hover:text-[#003B5C]"
+                      : "text-gray-400 cursor-not-allowed",
                   )}
                   onClick={handleDownloadClick}
                   disabled={!uploadedFile}
@@ -193,9 +208,9 @@ export default function ProfilePage() {
             <Card className="p-6 border-none shadow-sm rounded-xl relative">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-gray-800">Basic Details</h3>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
+                <Button
+                  variant="ghost"
+                  size="icon"
                   className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]"
                   onClick={() => setEditingBasicDetails(!editingBasicDetails)}
                 >
@@ -205,80 +220,136 @@ export default function ProfilePage() {
               {editingBasicDetails ? (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-xs uppercase mb-2 block">Employee ID</Label>
-                    <Input 
+                    <Label className="text-xs uppercase mb-2 block">
+                      Employee ID
+                    </Label>
+                    <Input
                       value={basicDetails.employeeId}
-                      onChange={(e) => setBasicDetails({...basicDetails, employeeId: e.target.value})}
+                      onChange={(e) =>
+                        setBasicDetails({
+                          ...basicDetails,
+                          employeeId: e.target.value,
+                        })
+                      }
                       placeholder="Enter Employee ID"
                       disabled
                     />
                   </div>
                   <div>
-                    <Label className="text-xs uppercase mb-2 block">First Name</Label>
-                    <Input 
+                    <Label className="text-xs uppercase mb-2 block">
+                      First Name
+                    </Label>
+                    <Input
                       value={basicDetails.firstName}
-                      onChange={(e) => setBasicDetails({...basicDetails, firstName: e.target.value})}
+                      onChange={(e) =>
+                        setBasicDetails({
+                          ...basicDetails,
+                          firstName: e.target.value,
+                        })
+                      }
                       placeholder="Enter First Name"
                     />
                   </div>
                   <div>
-                    <Label className="text-xs uppercase mb-2 block">Last Name</Label>
-                    <Input 
+                    <Label className="text-xs uppercase mb-2 block">
+                      Last Name
+                    </Label>
+                    <Input
                       value={basicDetails.lastName}
-                      onChange={(e) => setBasicDetails({...basicDetails, lastName: e.target.value})}
+                      onChange={(e) =>
+                        setBasicDetails({
+                          ...basicDetails,
+                          lastName: e.target.value,
+                        })
+                      }
                       placeholder="Enter Last Name"
                     />
                   </div>
                   <div>
-                    <Label className="text-xs uppercase mb-2 block">Date of Joining</Label>
-                    <Input 
+                    <Label className="text-xs uppercase mb-2 block">
+                      Date of Joining
+                    </Label>
+                    <Input
                       type="date"
                       value={basicDetails.dateOfJoining}
-                      onChange={(e) => setBasicDetails({...basicDetails, dateOfJoining: e.target.value})}
+                      onChange={(e) =>
+                        setBasicDetails({
+                          ...basicDetails,
+                          dateOfJoining: e.target.value,
+                        })
+                      }
                     />
                   </div>
                   <div>
-                    <Label className="text-xs uppercase mb-2 block">Nationality</Label>
-                    <Input 
+                    <Label className="text-xs uppercase mb-2 block">
+                      Nationality
+                    </Label>
+                    <Input
                       value={basicDetails.nationality}
-                      onChange={(e) => setBasicDetails({...basicDetails, nationality: e.target.value})}
+                      onChange={(e) =>
+                        setBasicDetails({
+                          ...basicDetails,
+                          nationality: e.target.value,
+                        })
+                      }
                       placeholder="Enter Nationality"
                     />
                   </div>
                   <div>
-                    <Label className="text-xs uppercase mb-2 block">Date of Birth</Label>
-                    <Input 
+                    <Label className="text-xs uppercase mb-2 block">
+                      Date of Birth
+                    </Label>
+                    <Input
                       type="date"
                       value={basicDetails.dateOfBirth}
-                      onChange={(e) => setBasicDetails({...basicDetails, dateOfBirth: e.target.value})}
+                      onChange={(e) =>
+                        setBasicDetails({
+                          ...basicDetails,
+                          dateOfBirth: e.target.value,
+                        })
+                      }
                     />
                   </div>
                   <div>
-                    <Label className="text-xs uppercase mb-2 block">Marital Status</Label>
-                    <Input 
+                    <Label className="text-xs uppercase mb-2 block">
+                      Marital Status
+                    </Label>
+                    <Input
                       value={basicDetails.maritalStatus}
-                      onChange={(e) => setBasicDetails({...basicDetails, maritalStatus: e.target.value})}
+                      onChange={(e) =>
+                        setBasicDetails({
+                          ...basicDetails,
+                          maritalStatus: e.target.value,
+                        })
+                      }
                       placeholder="Enter Marital Status"
                     />
                   </div>
                   <div>
-                    <Label className="text-xs uppercase mb-2 block">Religion</Label>
-                    <Input 
+                    <Label className="text-xs uppercase mb-2 block">
+                      Religion
+                    </Label>
+                    <Input
                       value={basicDetails.religion}
-                      onChange={(e) => setBasicDetails({...basicDetails, religion: e.target.value})}
+                      onChange={(e) =>
+                        setBasicDetails({
+                          ...basicDetails,
+                          religion: e.target.value,
+                        })
+                      }
                       placeholder="Enter Religion"
                     />
                   </div>
                   <div className="col-span-2 flex gap-2">
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       className="bg-[#00AEEF] hover:bg-[#003B5C] flex-1"
                       onClick={() => setEditingBasicDetails(false)}
                     >
                       Save
                     </Button>
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       variant="outline"
                       className="flex-1"
                       onClick={() => setEditingBasicDetails(false)}
@@ -291,35 +362,57 @@ export default function ProfilePage() {
                 <div className="grid grid-cols-2 gap-y-4 text-xs">
                   <div>
                     <p className="text-gray-400 uppercase mb-1">Employee ID</p>
-                    <p className="font-medium text-gray-700">{basicDetails.employeeId || "-"}</p>
+                    <p className="font-medium text-gray-700">
+                      {basicDetails.employeeId || "-"}
+                    </p>
                   </div>
                   <div>
                     <p className="text-gray-400 uppercase mb-1">First Name</p>
-                    <p className="font-medium text-gray-700">{basicDetails.firstName || "-"}</p>
+                    <p className="font-medium text-gray-700">
+                      {basicDetails.firstName || "-"}
+                    </p>
                   </div>
                   <div>
                     <p className="text-gray-400 uppercase mb-1">Last Name</p>
-                    <p className="font-medium text-gray-700">{basicDetails.lastName || "-"}</p>
+                    <p className="font-medium text-gray-700">
+                      {basicDetails.lastName || "-"}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-gray-400 uppercase mb-1">Date of Joining</p>
-                    <p className="font-medium text-gray-700">{basicDetails.dateOfJoining || "-"}</p>
+                    <p className="text-gray-400 uppercase mb-1">
+                      Date of Joining
+                    </p>
+                    <p className="font-medium text-gray-700">
+                      {basicDetails.dateOfJoining || "-"}
+                    </p>
                   </div>
                   <div>
                     <p className="text-gray-400 uppercase mb-1">Nationality</p>
-                    <p className="font-medium text-gray-700">{basicDetails.nationality || "-"}</p>
+                    <p className="font-medium text-gray-700">
+                      {basicDetails.nationality || "-"}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-gray-400 uppercase mb-1">Date of Birth</p>
-                    <p className="font-medium text-gray-700">{basicDetails.dateOfBirth || "-"}</p>
+                    <p className="text-gray-400 uppercase mb-1">
+                      Date of Birth
+                    </p>
+                    <p className="font-medium text-gray-700">
+                      {basicDetails.dateOfBirth || "-"}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-gray-400 uppercase mb-1">Marital Status</p>
-                    <p className="font-medium text-gray-700">{basicDetails.maritalStatus || "-"}</p>
+                    <p className="text-gray-400 uppercase mb-1">
+                      Marital Status
+                    </p>
+                    <p className="font-medium text-gray-700">
+                      {basicDetails.maritalStatus || "-"}
+                    </p>
                   </div>
                   <div>
                     <p className="text-gray-400 uppercase mb-1">Religion</p>
-                    <p className="font-medium text-gray-700">{basicDetails.religion || "-"}</p>
+                    <p className="font-medium text-gray-700">
+                      {basicDetails.religion || "-"}
+                    </p>
                   </div>
                 </div>
               )}
@@ -329,9 +422,9 @@ export default function ProfilePage() {
             <Card className="p-6 border-none shadow-sm rounded-xl">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-gray-800">Contact Information</h3>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
+                <Button
+                  variant="ghost"
+                  size="icon"
                   className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]"
                   onClick={() => setEditingContactInfo(!editingContactInfo)}
                 >
@@ -341,40 +434,61 @@ export default function ProfilePage() {
               {editingContactInfo ? (
                 <div className="space-y-4">
                   <div>
-                    <Label className="text-xs uppercase mb-2 block">Mobile Number</Label>
-                    <Input 
+                    <Label className="text-xs uppercase mb-2 block">
+                      Mobile Number
+                    </Label>
+                    <Input
                       value={contactInfo.mobileNumber}
-                      onChange={(e) => setContactInfo({...contactInfo, mobileNumber: e.target.value})}
+                      onChange={(e) =>
+                        setContactInfo({
+                          ...contactInfo,
+                          mobileNumber: e.target.value,
+                        })
+                      }
                       placeholder="Enter Mobile Number"
                     />
                   </div>
                   <div>
-                    <Label className="text-xs uppercase mb-2 block">Personal Email ID</Label>
-                    <Input 
+                    <Label className="text-xs uppercase mb-2 block">
+                      Personal Email ID
+                    </Label>
+                    <Input
                       type="email"
                       value={contactInfo.personalEmail}
-                      onChange={(e) => setContactInfo({...contactInfo, personalEmail: e.target.value})}
+                      onChange={(e) =>
+                        setContactInfo({
+                          ...contactInfo,
+                          personalEmail: e.target.value,
+                        })
+                      }
                       placeholder="Enter Email"
                     />
                   </div>
                   <div>
-                    <Label className="text-xs uppercase mb-2 block">Emergency Contact</Label>
-                    <Input 
+                    <Label className="text-xs uppercase mb-2 block">
+                      Emergency Contact
+                    </Label>
+                    <Input
                       value={contactInfo.emergencyContact}
-                      onChange={(e) => setContactInfo({...contactInfo, emergencyContact: e.target.value})}
+                      onChange={(e) =>
+                        setContactInfo({
+                          ...contactInfo,
+                          emergencyContact: e.target.value,
+                        })
+                      }
                       placeholder="Enter Emergency Contact"
                     />
                   </div>
                   <div className="flex gap-2 pt-2">
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       className="bg-[#00AEEF] hover:bg-[#003B5C] flex-1"
                       onClick={() => setEditingContactInfo(false)}
                     >
                       Save
                     </Button>
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       variant="outline"
                       className="flex-1"
                       onClick={() => setEditingContactInfo(false)}
@@ -386,16 +500,28 @@ export default function ProfilePage() {
               ) : (
                 <div className="space-y-4 text-xs">
                   <div>
-                    <p className="text-gray-400 uppercase mb-1">Mobile Number</p>
-                    <p className="font-medium text-gray-700">{contactInfo.mobileNumber || "-"}</p>
+                    <p className="text-gray-400 uppercase mb-1">
+                      Mobile Number
+                    </p>
+                    <p className="font-medium text-gray-700">
+                      {contactInfo.mobileNumber || "-"}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-gray-400 uppercase mb-1">Personal Email ID</p>
-                    <p className="font-medium text-gray-700">{contactInfo.personalEmail || "-"}</p>
+                    <p className="text-gray-400 uppercase mb-1">
+                      Personal Email ID
+                    </p>
+                    <p className="font-medium text-gray-700">
+                      {contactInfo.personalEmail || "-"}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-gray-400 uppercase mb-1">Emergency Contact</p>
-                    <p className="font-medium text-gray-700">{contactInfo.emergencyContact || "-"}</p>
+                    <p className="text-gray-400 uppercase mb-1">
+                      Emergency Contact
+                    </p>
+                    <p className="font-medium text-gray-700">
+                      {contactInfo.emergencyContact || "-"}
+                    </p>
                   </div>
                 </div>
               )}
@@ -408,7 +534,11 @@ export default function ProfilePage() {
             <Card className="p-6 border-none shadow-sm rounded-xl flex flex-col h-48">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-gray-800">About Employee</h3>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]"
+                >
                   <Pencil className="h-4 w-4" />
                 </Button>
               </div>
@@ -419,7 +549,11 @@ export default function ProfilePage() {
             <Card className="p-6 border-none shadow-sm rounded-xl">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-gray-800">Address Details</h3>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]"
+                >
                   <Pencil className="h-4 w-4" />
                 </Button>
               </div>
@@ -453,22 +587,32 @@ export default function ProfilePage() {
 
             {/* Identification Documents */}
             <Card className="p-6 border-none shadow-sm rounded-xl">
-              <h3 className="font-bold text-gray-800 mb-6">Identification Documents</h3>
+              <h3 className="font-bold text-gray-800 mb-6">
+                Identification Documents
+              </h3>
               <div className="grid grid-cols-2 gap-y-6 text-xs">
                 <div>
-                  <p className="text-gray-400 uppercase mb-1">National Identity Card Type</p>
+                  <p className="text-gray-400 uppercase mb-1">
+                    National Identity Card Type
+                  </p>
                   <p className="font-medium text-gray-700">-</p>
                 </div>
                 <div>
-                  <p className="text-gray-400 uppercase mb-1">National ID Upload</p>
+                  <p className="text-gray-400 uppercase mb-1">
+                    National ID Upload
+                  </p>
                   <p className="text-gray-400 italic">Read-only</p>
                 </div>
                 <div className="col-span-2">
-                  <p className="text-gray-400 uppercase mb-1">National Identity Number</p>
+                  <p className="text-gray-400 uppercase mb-1">
+                    National Identity Number
+                  </p>
                   <p className="font-medium text-gray-700">-</p>
                 </div>
                 <div>
-                  <p className="text-gray-400 uppercase mb-1">Tax Identification Card Type</p>
+                  <p className="text-gray-400 uppercase mb-1">
+                    Tax Identification Card Type
+                  </p>
                   <p className="font-medium text-gray-700">-</p>
                 </div>
                 <div>
@@ -476,7 +620,9 @@ export default function ProfilePage() {
                   <p className="text-gray-400 italic">Read-only</p>
                 </div>
                 <div className="col-span-2">
-                  <p className="text-gray-400 uppercase mb-1">Tax Identification Number</p>
+                  <p className="text-gray-400 uppercase mb-1">
+                    Tax Identification Number
+                  </p>
                   <p className="font-medium text-gray-700">-</p>
                 </div>
               </div>
@@ -489,7 +635,10 @@ export default function ProfilePage() {
             <Card className="p-6 border-none shadow-sm rounded-xl">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-gray-800">Skills & Expertise</h3>
-                <Button size="sm" className="bg-[#00AEEF] hover:bg-[#003B5C] h-8 gap-1">
+                <Button
+                  size="sm"
+                  className="bg-[#00AEEF] hover:bg-[#003B5C] h-8 gap-1"
+                >
                   <Plus className="h-3.5 w-3.5" /> Add
                 </Button>
               </div>
@@ -535,15 +684,21 @@ export default function ProfilePage() {
               <h3 className="font-bold text-gray-800 mb-6">Passport Details</h3>
               <div className="grid grid-cols-2 gap-y-6 text-xs">
                 <div>
-                  <p className="text-gray-400 uppercase mb-1">Do you have passport?</p>
+                  <p className="text-gray-400 uppercase mb-1">
+                    Do you have passport?
+                  </p>
                   <p className="font-medium text-gray-700">-</p>
                 </div>
                 <div>
-                  <p className="text-gray-400 uppercase mb-1">Passport Number</p>
+                  <p className="text-gray-400 uppercase mb-1">
+                    Passport Number
+                  </p>
                   <p className="font-medium text-gray-700">-</p>
                 </div>
                 <div className="col-span-2">
-                  <p className="text-gray-400 uppercase mb-1">Passport Expiry Date</p>
+                  <p className="text-gray-400 uppercase mb-1">
+                    Passport Expiry Date
+                  </p>
                   <p className="font-medium text-gray-700">-</p>
                 </div>
               </div>
@@ -553,7 +708,9 @@ export default function ProfilePage() {
           {/* Full Width Row - Insurance/Policy */}
           <div className="lg:col-span-8">
             <Card className="p-6 border-none shadow-sm rounded-xl">
-              <h3 className="font-bold text-gray-800 mb-6">Insurance / Policy Details</h3>
+              <h3 className="font-bold text-gray-800 mb-6">
+                Insurance / Policy Details
+              </h3>
               <div className="grid grid-cols-4 gap-y-6 text-xs">
                 <div>
                   <p className="text-gray-400 uppercase mb-1">Policy Number</p>
@@ -564,11 +721,15 @@ export default function ProfilePage() {
                   <p className="font-medium text-gray-700">-</p>
                 </div>
                 <div>
-                  <p className="text-gray-400 uppercase mb-1">Policy Start Date</p>
+                  <p className="text-gray-400 uppercase mb-1">
+                    Policy Start Date
+                  </p>
                   <p className="font-medium text-gray-700">-</p>
                 </div>
                 <div>
-                  <p className="text-gray-400 uppercase mb-1">Policy End Date</p>
+                  <p className="text-gray-400 uppercase mb-1">
+                    Policy End Date
+                  </p>
                   <p className="font-medium text-gray-700">-</p>
                 </div>
               </div>
@@ -580,13 +741,19 @@ export default function ProfilePage() {
             <Card className="p-6 border-none shadow-sm rounded-xl">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-gray-800">Education Documents</h3>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]"
+                >
                   <Pencil className="h-4 w-4" />
                 </Button>
               </div>
               <div className="space-y-6 text-xs">
                 <div>
-                  <p className="text-gray-400 uppercase mb-1">Highest Level of Education</p>
+                  <p className="text-gray-400 uppercase mb-1">
+                    Highest Level of Education
+                  </p>
                   <p className="font-medium text-gray-700">-</p>
                 </div>
                 <div className="grid grid-cols-1 gap-4">
@@ -602,7 +769,6 @@ export default function ProfilePage() {
               </div>
             </Card>
           </div>
-
         </main>
       </div>
     </div>
