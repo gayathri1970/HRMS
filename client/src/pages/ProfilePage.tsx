@@ -1,4 +1,3 @@
-import logoUrl from "@assets/novintix_1773119222458.jpeg";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
@@ -7,44 +6,22 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
 import {
   User,
-  Mail,
-  Phone,
-  MapPin,
-  Briefcase,
   FileText,
   Upload,
   Download,
   Plus,
-  Trash2,
-  Globe,
-  Heart,
-  Shield,
-  BookOpen,
-  Users,
   Pencil,
-  ClipboardList,
-  Monitor,
-  LogOut,
 } from "lucide-react";
-import { useLocation, Link } from "wouter";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { useLocation } from "wouter";
+import Header from "@/components/Header";
+import Sidebar from "@/components/Sidebar";
 
 export default function ProfilePage() {
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [location, setLocation] = useLocation();
-
-  // Logout handler
-  const handleLogout = () => {
-    setLocation("/");
-  };
 
   // Edit mode states
   const [editingBasicDetails, setEditingBasicDetails] = useState(false);
@@ -55,28 +32,28 @@ export default function ProfilePage() {
 
   // Form data states
   const [basicDetails, setBasicDetails] = useState({
-    employeeId: "",
-    firstName: "",
-    lastName: "",
-    dateOfBirth: "",
-    dateOfJoining: "",
-    nationality: "",
-    religion: "",
-    maritalStatus: "",
+    employeeId: "GP001",
+    firstName: "Gayathri",
+    lastName: "Palani",
+    dateOfBirth: "2004-07-19",
+    dateOfJoining: "2025-02-02",
+    nationality: "Indian",
+    religion: "Hindu",
+    maritalStatus: "Single",
   });
   const [contactInfo, setContactInfo] = useState({
-    mobileNumber: "",
-    personalEmail: "",
-    emergencyContact: "",
+    mobileNumber: "7695838187",
+    personalEmail: "gayathrips1970@gmail.com",
+    emergencyContact: "9942745200",
   });
   const [aboutText, setAboutText] = useState("");
   const [addressInfo, setAddressInfo] = useState({
-    address: "",
-    city: "",
-    state: "",
-    country: "",
-    pincode: "",
-    workLocation: "",
+    address: "Narasingapuram, Thuraiyur",
+    city: "Tiruchirappalli",
+    state: "TamilNadu",
+    country: "India",
+    pincode: "621008",
+    workLocation: "Coimbatore",
   });
 
   const handleUploadClick = () => {
@@ -113,181 +90,10 @@ export default function ProfilePage() {
         onChange={handleFileChange}
         accept=".pdf,.doc,.docx"
       />
-      {/* Header */}
-      <header className="bg-[#003B5C] text-white h-16 flex items-center justify-between px-6 sticky top-0 z-50 shadow-md">
-        <div className="flex items-center gap-4 h-full">
-          <div className="h-full flex items-center">
-            <img
-              src={logoUrl}
-              alt="Logo"
-              className="h-10 w-10 rounded-sm bg-white object-contain"
-            />
-          </div>
-          <h1 className="text-xl font-semibold tracking-wide">Profile</h1>
-        </div>
-        <div className="flex items-center gap-3">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Avatar className="h-10 w-10 border-2 border-white/20 cursor-pointer hover:opacity-80 transition-opacity">
-                <AvatarImage src={profilePhoto || ""} />
-                <AvatarFallback className="bg-white text-[#003B5C] font-bold">
-                  GP
-                </AvatarFallback>
-              </Avatar>
-            </PopoverTrigger>
-            <PopoverContent className="w-56 p-0 mt-2 border-none shadow-xl rounded-xl overflow-hidden">
-              <div className="bg-[#003B5C] p-4 text-white">
-                <p className="font-bold text-sm">Gayathri Palani</p>
-                <p className="text-xs opacity-80">AI Intern</p>
-              </div>
-              <div className="p-1 bg-white">
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Logout
-                </button>
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-      </header>
+      <Header title="Profile" />
 
       <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-20 bg-white min-h-[calc(100vh-4rem)] flex flex-col items-center py-6 gap-8 border-r border-gray-200 shadow-sm">
-          <Link href="/profile">
-            <div
-              className={cn(
-                "flex flex-col items-center gap-1 group cursor-pointer",
-                location === "/profile"
-                  ? "opacity-100"
-                  : "opacity-40 hover:opacity-100 transition-opacity",
-              )}
-            >
-              <div
-                className={cn(
-                  "p-2 rounded-lg",
-                  location === "/profile"
-                    ? "bg-[#003B5C]/10"
-                    : "group-hover:bg-[#003B5C]/5",
-                )}
-              >
-                <User
-                  className={cn(
-                    "h-6 w-6",
-                    location === "/profile"
-                      ? "text-[#003B5C]"
-                      : "text-gray-500 group-hover:text-[#003B5C]",
-                  )}
-                />
-              </div>
-              <span
-                className={cn(
-                  "text-[10px] font-semibold uppercase tracking-tighter",
-                  location === "/profile"
-                    ? "text-[#003B5C]"
-                    : "text-gray-400 group-hover:text-[#003B5C]",
-                )}
-              >
-                Profile
-              </span>
-            </div>
-          </Link>
-
-          <div className="flex flex-col items-center gap-1 group cursor-pointer opacity-40 hover:opacity-100 transition-opacity">
-            <Briefcase className="h-6 w-6 text-[#003B5C]" />
-            <span className="text-[10px] text-[#003B5C] font-medium uppercase tracking-tighter text-center">
-              Timesheet
-            </span>
-          </div>
-
-          <Link href="/leave-request">
-            <div
-              className={cn(
-                "flex flex-col items-center gap-1 group cursor-pointer",
-                location === "/leave-request"
-                  ? "opacity-100"
-                  : "opacity-40 hover:opacity-100 transition-opacity",
-              )}
-            >
-              <div
-                className={cn(
-                  "p-2 rounded-lg",
-                  location === "/leave-request"
-                    ? "bg-[#003B5C]/10"
-                    : "group-hover:bg-[#003B5C]/5",
-                )}
-              >
-                <ClipboardList
-                  className={cn(
-                    "h-6 w-6",
-                    location === "/leave-request"
-                      ? "text-[#003B5C]"
-                      : "text-gray-500 group-hover:text-[#003B5C]",
-                  )}
-                />
-              </div>
-              <span
-                className={cn(
-                  "text-[10px] font-semibold uppercase tracking-tighter text-center",
-                  location === "/leave-request"
-                    ? "text-[#003B5C]"
-                    : "text-gray-400 group-hover:text-[#003B5C]",
-                )}
-              >
-                Leave Request
-              </span>
-            </div>
-          </Link>
-
-          <Link href="/asset-request">
-            <div
-              className={cn(
-                "flex flex-col items-center gap-1 group cursor-pointer",
-                location === "/asset-request"
-                  ? "opacity-100"
-                  : "opacity-40 hover:opacity-100 transition-opacity",
-              )}
-            >
-              <div
-                className={cn(
-                  "p-2 rounded-lg",
-                  location === "/asset-request"
-                    ? "bg-[#003B5C]/10"
-                    : "group-hover:bg-[#003B5C]/5",
-                )}
-              >
-                <Monitor
-                  className={cn(
-                    "h-6 w-6",
-                    location === "/asset-request"
-                      ? "text-[#003B5C]"
-                      : "text-gray-500 group-hover:text-[#003B5C]",
-                  )}
-                />
-              </div>
-              <span
-                className={cn(
-                  "text-[10px] font-semibold uppercase tracking-tighter text-center",
-                  location === "/asset-request"
-                    ? "text-[#003B5C]"
-                    : "text-gray-400 group-hover:text-[#003B5C]",
-                )}
-              >
-                Asset Request
-              </span>
-            </div>
-          </Link>
-
-          <div className="flex flex-col items-center gap-1 group cursor-pointer opacity-40 hover:opacity-100 transition-opacity">
-            <FileText className="h-6 w-6 text-[#003B5C]" />
-            <span className="text-[10px] text-[#003B5C] font-medium uppercase tracking-tighter">
-              Policy
-            </span>
-          </div>
-        </aside>
+        <Sidebar />
 
         {/* Main Content */}
         <main className="flex-1 p-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -304,7 +110,7 @@ export default function ProfilePage() {
                   </AvatarFallback>
                 </Avatar>
                 <h2 className="text-xl font-bold text-gray-900">
-                  Gayathri Palani
+                  {basicDetails.firstName} {basicDetails.lastName}
                 </h2>
                 <p className="text-[#00AEEF] bg-[#E1F5FE] px-4 py-1 rounded-full text-xs font-semibold mt-2">
                   AI Intern
@@ -362,7 +168,7 @@ export default function ProfilePage() {
               {editingBasicDetails ? (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-xs uppercase mb-2 block">
+                    <Label className="text-xs uppercase mb-2 block text-gray-400">
                       Employee ID
                     </Label>
                     <Input
@@ -378,7 +184,7 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div>
-                    <Label className="text-xs uppercase mb-2 block">
+                    <Label className="text-xs uppercase mb-2 block text-gray-400">
                       First Name
                     </Label>
                     <Input
@@ -393,7 +199,7 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div>
-                    <Label className="text-xs uppercase mb-2 block">
+                    <Label className="text-xs uppercase mb-2 block text-gray-400">
                       Last Name
                     </Label>
                     <Input
@@ -408,7 +214,7 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div>
-                    <Label className="text-xs uppercase mb-2 block">
+                    <Label className="text-xs uppercase mb-2 block text-gray-400">
                       Date of Joining
                     </Label>
                     <Input
@@ -423,7 +229,7 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div>
-                    <Label className="text-xs uppercase mb-2 block">
+                    <Label className="text-xs uppercase mb-2 block text-gray-400">
                       Nationality
                     </Label>
                     <Input
@@ -438,7 +244,7 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div>
-                    <Label className="text-xs uppercase mb-2 block">
+                    <Label className="text-xs uppercase mb-2 block text-gray-400">
                       Date of Birth
                     </Label>
                     <Input
@@ -453,7 +259,7 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div>
-                    <Label className="text-xs uppercase mb-2 block">
+                    <Label className="text-xs uppercase mb-2 block text-gray-400">
                       Marital Status
                     </Label>
                     <Input
@@ -468,7 +274,7 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div>
-                    <Label className="text-xs uppercase mb-2 block">
+                    <Label className="text-xs uppercase mb-2 block text-gray-400">
                       Religion
                     </Label>
                     <Input
@@ -482,7 +288,7 @@ export default function ProfilePage() {
                       placeholder="Enter Religion"
                     />
                   </div>
-                  <div className="col-span-2 flex gap-2">
+                  <div className="col-span-2 flex gap-2 pt-2">
                     <Button
                       size="sm"
                       className="bg-[#00AEEF] hover:bg-[#003B5C] flex-1"
@@ -576,7 +382,7 @@ export default function ProfilePage() {
               {editingContactInfo ? (
                 <div className="space-y-4">
                   <div>
-                    <Label className="text-xs uppercase mb-2 block">
+                    <Label className="text-xs uppercase mb-2 block text-gray-400">
                       Mobile Number
                     </Label>
                     <Input
@@ -591,7 +397,7 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div>
-                    <Label className="text-xs uppercase mb-2 block">
+                    <Label className="text-xs uppercase mb-2 block text-gray-400">
                       Personal Email ID
                     </Label>
                     <Input
@@ -607,7 +413,7 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div>
-                    <Label className="text-xs uppercase mb-2 block">
+                    <Label className="text-xs uppercase mb-2 block text-gray-400">
                       Emergency Contact
                     </Label>
                     <Input
@@ -673,18 +479,41 @@ export default function ProfilePage() {
           {/* Middle Column */}
           <div className="lg:col-span-4 flex flex-col gap-6">
             {/* About Employee */}
-            <Card className="p-6 border-none shadow-sm rounded-xl flex flex-col h-48">
+            <Card className="p-6 border-none shadow-sm rounded-xl flex flex-col min-h-[12rem]">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-gray-800">About Employee</h3>
                 <Button
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]"
+                  onClick={() => setEditingAbout(!editingAbout)}
                 >
                   <Pencil className="h-4 w-4" />
                 </Button>
               </div>
-              <p className="text-gray-400 text-sm">-</p>
+              {editingAbout ? (
+                <div className="space-y-4 flex-1 flex flex-col">
+                  <Textarea 
+                    value={aboutText}
+                    onChange={(e) => setAboutText(e.target.value)}
+                    placeholder="Write about yourself..."
+                    className="flex-1 min-h-[8rem] resize-none"
+                  />
+                  <div className="flex gap-2">
+                    <Button 
+                      size="sm" 
+                      className="bg-[#00AEEF] hover:bg-[#003B5C] flex-1"
+                      onClick={() => setEditingAbout(false)}
+                    >
+                      Save
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-gray-500 text-sm italic">
+                  {aboutText || "No information provided yet."}
+                </p>
+              )}
             </Card>
 
             {/* Address Details */}
@@ -695,36 +524,97 @@ export default function ProfilePage() {
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]"
+                  onClick={() => setEditingAddress(!editingAddress)}
                 >
                   <Pencil className="h-4 w-4" />
                 </Button>
               </div>
-              <div className="grid grid-cols-2 gap-y-6 text-xs">
-                <div className="col-span-2">
-                  <p className="text-gray-400 uppercase mb-1">Address</p>
-                  <p className="font-medium text-gray-700">-</p>
+              {editingAddress ? (
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-xs uppercase mb-2 block text-gray-400">Address</Label>
+                    <Input 
+                      value={addressInfo.address}
+                      onChange={(e) => setAddressInfo({...addressInfo, address: e.target.value})}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-xs uppercase mb-2 block text-gray-400">City</Label>
+                      <Input 
+                        value={addressInfo.city}
+                        onChange={(e) => setAddressInfo({...addressInfo, city: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs uppercase mb-2 block text-gray-400">State</Label>
+                      <Input 
+                        value={addressInfo.state}
+                        onChange={(e) => setAddressInfo({...addressInfo, state: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-xs uppercase mb-2 block text-gray-400">Pincode</Label>
+                      <Input 
+                        value={addressInfo.pincode}
+                        onChange={(e) => setAddressInfo({...addressInfo, pincode: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs uppercase mb-2 block text-gray-400">Country</Label>
+                      <Input 
+                        value={addressInfo.country}
+                        onChange={(e) => setAddressInfo({...addressInfo, country: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-xs uppercase mb-2 block text-gray-400">Work Location</Label>
+                    <Input 
+                      value={addressInfo.workLocation}
+                      onChange={(e) => setAddressInfo({...addressInfo, workLocation: e.target.value})}
+                    />
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <Button 
+                      size="sm" 
+                      className="bg-[#00AEEF] hover:bg-[#003B5C] flex-1"
+                      onClick={() => setEditingAddress(false)}
+                    >
+                      Save
+                    </Button>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-gray-400 uppercase mb-1">City</p>
-                  <p className="font-medium text-gray-700">-</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-y-6 text-xs">
+                  <div className="col-span-2">
+                    <p className="text-gray-400 uppercase mb-1">Address</p>
+                    <p className="font-medium text-gray-700">{addressInfo.address || "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 uppercase mb-1">City</p>
+                    <p className="font-medium text-gray-700">{addressInfo.city || "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 uppercase mb-1">State</p>
+                    <p className="font-medium text-gray-700">{addressInfo.state || "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 uppercase mb-1">Pin Code</p>
+                    <p className="font-medium text-gray-700">{addressInfo.pincode || "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 uppercase mb-1">Country</p>
+                    <p className="font-medium text-gray-700">{addressInfo.country || "-"}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-gray-400 uppercase mb-1">Work Location</p>
+                    <p className="font-medium text-gray-700">{addressInfo.workLocation || "-"}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-gray-400 uppercase mb-1">State</p>
-                  <p className="font-medium text-gray-700">-</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 uppercase mb-1">Pin Code</p>
-                  <p className="font-medium text-gray-700">-</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 uppercase mb-1">Country</p>
-                  <p className="font-medium text-gray-700">-</p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-gray-400 uppercase mb-1">Work Location</p>
-                  <p className="font-medium text-gray-700">-</p>
-                </div>
-              </div>
+              )}
             </Card>
 
             {/* Identification Documents */}
@@ -785,7 +675,6 @@ export default function ProfilePage() {
                 </Button>
               </div>
               <div className="space-y-6">
-                {/* Empty State or Skills placeholder */}
                 <p className="text-gray-400 text-sm">No skills added yet</p>
               </div>
             </Card>
