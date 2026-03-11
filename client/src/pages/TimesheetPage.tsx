@@ -38,16 +38,23 @@ export default function TimesheetPage() {
     return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
   };
 
+  const getMonday = (date: Date) => {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(d.setDate(diff));
+  };
+
   const prevWeek = () => {
     const newDate = new Date(weekStart);
     newDate.setDate(newDate.getDate() - 7);
-    setWeekStart(newDate);
+    setWeekStart(getMonday(newDate));
   };
 
   const nextWeek = () => {
     const newDate = new Date(weekStart);
     newDate.setDate(newDate.getDate() + 7);
-    setWeekStart(newDate);
+    setWeekStart(getMonday(newDate));
   };
 
   const prevMonth = () => {
@@ -146,10 +153,10 @@ export default function TimesheetPage() {
                     <button onClick={prevWeek} className="p-1 hover:bg-gray-100 rounded transition-colors">
                       <ChevronLeft className="h-5 w-5 text-gray-600" />
                     </button>
-                    <div className="flex items-center gap-2 min-w-[300px]">
+                    <div className="flex items-center gap-2 whitespace-nowrap">
                       <Calendar className="h-5 w-5 text-gray-600" />
                       <span className="text-sm font-medium text-gray-700">
-                        {days[weekStart.getDay()].substring(0, 3)}, {weekStart.getDate()} {months[weekStart.getMonth()].substring(0, 3)}&apos;{weekStart.getFullYear().toString().slice(-2)} to {days[weekEnd.getDay()].substring(0, 3)}, {weekEnd.getDate()} {months[weekEnd.getMonth()].substring(0, 3)}&apos;{weekEnd.getFullYear().toString().slice(-2)}
+                        {days[(weekStart.getDay() + 6) % 7]}, {weekStart.getDate()} {months[weekStart.getMonth()].substring(0, 3)}&apos;{weekStart.getFullYear().toString().slice(-2)} to {days[(weekEnd.getDay() + 6) % 7]}, {weekEnd.getDate()} {months[weekEnd.getMonth()].substring(0, 3)}&apos;{weekEnd.getFullYear().toString().slice(-2)}
                       </span>
                     </div>
                     <button onClick={nextWeek} className="p-1 hover:bg-gray-100 rounded transition-colors">
@@ -177,14 +184,15 @@ export default function TimesheetPage() {
                       <thead>
                         <tr className="border-b border-gray-200">
                           <th className="text-left py-3 px-4 font-bold text-gray-800">Project Name</th>
-                          {days.map((day, idx) => (
-                            <th key={day} className="text-center py-3 px-2 font-bold text-gray-800 text-sm">
-                              <div>{day}</div>
-                              <div className="text-xs font-normal text-gray-500">
-                                {new Date(weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                              </div>
-                            </th>
-                          ))}
+                          {days.map((day, idx) => {
+                            const dayDate = new Date(weekStart);
+                            dayDate.setDate(dayDate.getDate() + idx);
+                            return (
+                              <th key={day} className="text-center py-3 px-2 font-bold text-gray-800 text-sm whitespace-nowrap">
+                                {day} {months[dayDate.getMonth()].substring(0, 3)} {dayDate.getDate()}
+                              </th>
+                            );
+                          })}
                           <th className="text-center py-3 px-2 font-bold text-gray-800 text-sm">Total</th>
                           <th className="text-center py-3 px-2 w-10"></th>
                         </tr>
@@ -202,7 +210,8 @@ export default function TimesheetPage() {
                                   type="number"
                                   value={hours}
                                   onChange={(e) => updateProjectHours(project.id, dayIdx, parseInt(e.target.value) || 0)}
-                                  className="w-12 px-2 py-1 text-center text-sm border border-gray-200 rounded"
+                                  className="w-12 px-2 py-1 text-center text-sm border border-gray-200 rounded [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                  style={{ MozAppearance: 'textfield' }}
                                 />
                               </td>
                             ))}
