@@ -13,9 +13,8 @@ const months = ["January", "February", "March", "April", "May", "June", "July", 
 
 interface Project {
   id: string;
+  client: string;
   name: string;
-  task: string;
-  description: string;
   hours: number[];
 }
 
@@ -23,10 +22,13 @@ export default function TimesheetPage() {
   const [weekStart, setWeekStart] = useState(new Date(2026, 2, 2)); // March 2, 2026 (Monday)
   const [projects, setProjects] = useState<Project[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newProjectName, setNewProjectName] = useState("");
-  const [newProjectTask, setNewProjectTask] = useState("");
-  const [newProjectDescription, setNewProjectDescription] = useState("");
+  const [selectedClient, setSelectedClient] = useState("");
+  const [selectedProjectName, setSelectedProjectName] = useState("");
   const [currentDate, setCurrentDate] = useState(new Date(2026, 2));
+  const [today] = useState(new Date(2026, 2, 11)); // March 11, 2026 (Wednesday)
+
+  const clientOptions = ["Novintix"];
+  const projectNameOptions = ["Internship", "Internal", "AI Internal"];
 
   const getDaysInMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -77,26 +79,23 @@ export default function TimesheetPage() {
   }
 
   const handleAddProject = () => {
-    if (newProjectName.trim()) {
+    if (selectedClient.trim() && selectedProjectName.trim()) {
       const newProject: Project = {
         id: Date.now().toString(),
-        name: newProjectName,
-        task: newProjectTask,
-        description: newProjectDescription,
+        client: selectedClient,
+        name: selectedProjectName,
         hours: [0, 0, 0, 0, 0, 0, 0],
       };
       setProjects([...projects, newProject]);
-      setNewProjectName("");
-      setNewProjectTask("");
-      setNewProjectDescription("");
+      setSelectedClient("");
+      setSelectedProjectName("");
       setShowAddModal(false);
     }
   };
 
   const resetModal = () => {
-    setNewProjectName("");
-    setNewProjectTask("");
-    setNewProjectDescription("");
+    setSelectedClient("");
+    setSelectedProjectName("");
     setShowAddModal(false);
   };
 
@@ -147,10 +146,10 @@ export default function TimesheetPage() {
                     <button onClick={prevWeek} className="p-1 hover:bg-gray-100 rounded transition-colors">
                       <ChevronLeft className="h-5 w-5 text-gray-600" />
                     </button>
-                    <div className="flex items-center gap-2 min-w-[250px]">
+                    <div className="flex items-center gap-2 min-w-[300px]">
                       <Calendar className="h-5 w-5 text-gray-600" />
                       <span className="text-sm font-medium text-gray-700">
-                        {weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
+                        {days[weekStart.getDay()].substring(0, 3)}, {weekStart.getDate()} {months[weekStart.getMonth()].substring(0, 3)}&apos;{weekStart.getFullYear().toString().slice(-2)} to {days[weekEnd.getDay()].substring(0, 3)}, {weekEnd.getDate()} {months[weekEnd.getMonth()].substring(0, 3)}&apos;{weekEnd.getFullYear().toString().slice(-2)}
                       </span>
                     </div>
                     <button onClick={nextWeek} className="p-1 hover:bg-gray-100 rounded transition-colors">
@@ -194,9 +193,8 @@ export default function TimesheetPage() {
                         {projects.map((project) => (
                           <tr key={project.id} className="border-b border-gray-200 hover:bg-gray-50">
                             <td className="py-4 px-4 text-sm bg-gray-50">
-                              <div className="font-bold text-gray-800">{project.name}</div>
-                              <div className="text-xs text-gray-600 mt-1">{project.task}</div>
-                              {project.description && <div className="text-xs text-gray-500 mt-1">{project.description}</div>}
+                              <div className="text-xs text-gray-600">{project.client}</div>
+                              <div className="font-bold text-gray-800 mt-1">{project.name}</div>
                             </td>
                             {project.hours.map((hours, dayIdx) => (
                               <td key={dayIdx} className="text-center py-4 px-2">
@@ -277,7 +275,7 @@ export default function TimesheetPage() {
                         "aspect-square flex items-center justify-center text-sm rounded transition-colors",
                         day === null
                           ? ""
-                          : [2, 3, 4, 5, 6].includes(day)
+                          : day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()
                           ? "bg-[#00AEEF] text-white font-bold cursor-pointer hover:bg-[#0099D8]"
                           : "text-gray-700 hover:bg-gray-100 cursor-pointer"
                       )}
@@ -318,7 +316,7 @@ export default function TimesheetPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <Card className="w-full max-w-md p-6 bg-white border-none shadow-lg rounded-xl">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-800">Add Project</h2>
+              <h2 className="text-lg font-bold text-gray-800">Add New Project</h2>
               <button onClick={resetModal} className="text-gray-400 hover:text-gray-600">
                 <X className="h-5 w-5" />
               </button>
@@ -326,42 +324,41 @@ export default function TimesheetPage() {
 
             <div className="space-y-4">
               <div>
+                <Label htmlFor="client" className="text-sm font-medium text-gray-700">
+                  Client
+                </Label>
+                <select
+                  id="client"
+                  value={selectedClient}
+                  onChange={(e) => setSelectedClient(e.target.value)}
+                  className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select a client...</option>
+                  {clientOptions.map((client) => (
+                    <option key={client} value={client}>
+                      {client}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
                 <Label htmlFor="project-name" className="text-sm font-medium text-gray-700">
                   Project Name
                 </Label>
-                <Input
+                <select
                   id="project-name"
-                  value={newProjectName}
-                  onChange={(e) => setNewProjectName(e.target.value)}
-                  placeholder="Enter project name..."
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="project-task" className="text-sm font-medium text-gray-700">
-                  Task
-                </Label>
-                <Input
-                  id="project-task"
-                  value={newProjectTask}
-                  onChange={(e) => setNewProjectTask(e.target.value)}
-                  placeholder="Enter task description..."
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="project-description" className="text-sm font-medium text-gray-700">
-                  Description
-                </Label>
-                <Textarea
-                  id="project-description"
-                  value={newProjectDescription}
-                  onChange={(e) => setNewProjectDescription(e.target.value)}
-                  placeholder="Enter project description..."
-                  className="mt-1"
-                />
+                  value={selectedProjectName}
+                  onChange={(e) => setSelectedProjectName(e.target.value)}
+                  className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select a project...</option>
+                  {projectNameOptions.map((project) => (
+                    <option key={project} value={project}>
+                      {project}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
