@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Calendar, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 
@@ -13,14 +14,18 @@ const months = ["January", "February", "March", "April", "May", "June", "July", 
 interface Project {
   id: string;
   name: string;
+  task: string;
+  description: string;
   hours: number[];
 }
 
 export default function TimesheetPage() {
   const [weekStart, setWeekStart] = useState(new Date(2026, 2, 2)); // March 2, 2026 (Monday)
   const [projects, setProjects] = useState<Project[]>([]);
-  const [showAddProject, setShowAddProject] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
+  const [newProjectTask, setNewProjectTask] = useState("");
+  const [newProjectDescription, setNewProjectDescription] = useState("");
   const [currentDate, setCurrentDate] = useState(new Date(2026, 2));
 
   const getDaysInMonth = (date: Date) => {
@@ -76,12 +81,23 @@ export default function TimesheetPage() {
       const newProject: Project = {
         id: Date.now().toString(),
         name: newProjectName,
+        task: newProjectTask,
+        description: newProjectDescription,
         hours: [0, 0, 0, 0, 0, 0, 0],
       };
       setProjects([...projects, newProject]);
       setNewProjectName("");
-      setShowAddProject(false);
+      setNewProjectTask("");
+      setNewProjectDescription("");
+      setShowAddModal(false);
     }
+  };
+
+  const resetModal = () => {
+    setNewProjectName("");
+    setNewProjectTask("");
+    setNewProjectDescription("");
+    setShowAddModal(false);
   };
 
   const updateProjectHours = (projectId: string, dayIndex: number, hours: number) => {
@@ -143,28 +159,12 @@ export default function TimesheetPage() {
                   </div>
                   <Button 
                     className="bg-[#6B8BA8] hover:bg-[#5A7799] text-white gap-2"
-                    onClick={() => setShowAddProject(!showAddProject)}
+                    onClick={() => setShowAddModal(true)}
                   >
                     <Plus className="h-4 w-4" />
                     Add Project
                   </Button>
                 </div>
-
-                {/* Add Project Form */}
-                {showAddProject && (
-                  <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="flex gap-2">
-                      <Input
-                        value={newProjectName}
-                        onChange={(e) => setNewProjectName(e.target.value)}
-                        placeholder="Enter project name..."
-                        onKeyPress={(e) => e.key === 'Enter' && handleAddProject()}
-                      />
-                      <Button size="sm" className="bg-[#00AEEF] hover:bg-[#003B5C]" onClick={handleAddProject}>Add</Button>
-                      <Button size="sm" variant="outline" onClick={() => setShowAddProject(false)}>Cancel</Button>
-                    </div>
-                  </div>
-                )}
 
                 {/* Timesheet Content */}
                 {projects.length === 0 ? (
@@ -193,8 +193,10 @@ export default function TimesheetPage() {
                       <tbody>
                         {projects.map((project) => (
                           <tr key={project.id} className="border-b border-gray-200 hover:bg-gray-50">
-                            <td className="py-4 px-4 text-sm font-medium text-gray-700 bg-gray-50">
-                              {project.name}
+                            <td className="py-4 px-4 text-sm bg-gray-50">
+                              <div className="font-bold text-gray-800">{project.name}</div>
+                              <div className="text-xs text-gray-600 mt-1">{project.task}</div>
+                              {project.description && <div className="text-xs text-gray-500 mt-1">{project.description}</div>}
                             </td>
                             {project.hours.map((hours, dayIdx) => (
                               <td key={dayIdx} className="text-center py-4 px-2">
@@ -310,6 +312,77 @@ export default function TimesheetPage() {
           </div>
         </main>
       </div>
+
+      {/* Add Project Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md p-6 bg-white border-none shadow-lg rounded-xl">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-gray-800">Add Project</h2>
+              <button onClick={resetModal} className="text-gray-400 hover:text-gray-600">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="project-name" className="text-sm font-medium text-gray-700">
+                  Project Name
+                </Label>
+                <Input
+                  id="project-name"
+                  value={newProjectName}
+                  onChange={(e) => setNewProjectName(e.target.value)}
+                  placeholder="Enter project name..."
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="project-task" className="text-sm font-medium text-gray-700">
+                  Task
+                </Label>
+                <Input
+                  id="project-task"
+                  value={newProjectTask}
+                  onChange={(e) => setNewProjectTask(e.target.value)}
+                  placeholder="Enter task description..."
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="project-description" className="text-sm font-medium text-gray-700">
+                  Description
+                </Label>
+                <Textarea
+                  id="project-description"
+                  value={newProjectDescription}
+                  onChange={(e) => setNewProjectDescription(e.target.value)}
+                  placeholder="Enter project description..."
+                  className="mt-1"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <Button
+                onClick={handleAddProject}
+                className="flex-1 bg-[#00AEEF] hover:bg-[#0099D8] text-white"
+              >
+                Add Project
+              </Button>
+              <Button
+                onClick={resetModal}
+                variant="outline"
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
