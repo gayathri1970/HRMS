@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 
@@ -13,21 +12,20 @@ const months = ["January", "February", "March", "April", "May", "June", "July", 
 
 interface Project {
   id: string;
-  client: string;
   name: string;
   hours: number[];
+  saved: boolean;
 }
 
 export default function TimesheetPage() {
   const [weekStart, setWeekStart] = useState(new Date(2026, 2, 2)); // March 2, 2026 (Monday)
   const [projects, setProjects] = useState<Project[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [selectedClient, setSelectedClient] = useState("");
   const [selectedProjectName, setSelectedProjectName] = useState("");
   const [currentDate, setCurrentDate] = useState(new Date(2026, 2));
   const [today] = useState(new Date(2026, 2, 11)); // March 11, 2026 (Wednesday)
+  const [submittedWeeks, setSubmittedWeeks] = useState<string[]>([]);
 
-  const clientOptions = ["Novintix"];
   const projectNameOptions = ["Internship", "Internal", "AI Internal"];
 
   const getDaysInMonth = (date: Date) => {
@@ -43,6 +41,11 @@ export default function TimesheetPage() {
     const day = d.getDay();
     const diff = d.getDate() - day + (day === 0 ? -6 : 1);
     return new Date(d.setDate(diff));
+  };
+
+  const getWeekKey = (date: Date) => {
+    const d = new Date(date);
+    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
   };
 
   const prevWeek = () => {
@@ -85,37 +88,52 @@ export default function TimesheetPage() {
     calendarDays.push(i);
   }
 
+  const isWeekSubmitted = submittedWeeks.includes(getWeekKey(weekStart));
+
   const handleAddProject = () => {
-    if (selectedClient.trim() && selectedProjectName.trim()) {
+    if (selectedProjectName.trim()) {
       const newProject: Project = {
         id: Date.now().toString(),
-        client: selectedClient,
         name: selectedProjectName,
         hours: [0, 0, 0, 0, 0, 0, 0],
+        saved: false,
       };
       setProjects([...projects, newProject]);
-      setSelectedClient("");
       setSelectedProjectName("");
       setShowAddModal(false);
     }
   };
 
   const resetModal = () => {
-    setSelectedClient("");
     setSelectedProjectName("");
     setShowAddModal(false);
   };
 
   const updateProjectHours = (projectId: string, dayIndex: number, hours: number) => {
-    setProjects(projects.map(project =>
-      project.id === projectId
-        ? { ...project, hours: project.hours.map((h, i) => i === dayIndex ? hours : h) }
-        : project
-    ));
+    if (!isWeekSubmitted) {
+      setProjects(projects.map(project =>
+        project.id === projectId && !project.saved
+          ? { ...project, hours: project.hours.map((h, i) => i === dayIndex ? hours : h) }
+          : project
+      ));
+    }
   };
 
   const deleteProject = (projectId: string) => {
-    setProjects(projects.filter(p => p.id !== projectId));
+    if (!isWeekSubmitted) {
+      setProjects(projects.filter(p => p.id !== projectId));
+    }
+  };
+
+  const saveProjects = () => {
+    setProjects(projects.map(p => ({ ...p, saved: true })));
+  };
+
+  const submitTimesheet = () => {
+    const weekKey = getWeekKey(weekStart);
+    if (!submittedWeeks.includes(weekKey)) {
+      setSubmittedWeeks([...submittedWeeks, weekKey]);
+    }
   };
 
   const getTotalHours = (projectHours: number[]) => {
@@ -130,6 +148,21 @@ export default function TimesheetPage() {
       });
     });
     return totals;
+  };
+
+  const isDateInSubmittedWeek = (date: number): boolean => {
+    const dateObj = new Date(currentYear, currentMonth, date);
+    for (const weekKey of submittedWeeks) {
+      const [year, month, dayOfMonth] = weekKey.split("-").map(Number);
+      const weekStartDate = new Date(year, month, dayOfMonth);
+      const weekEndDate = new Date(weekStartDate);
+      weekEndDate.setDate(weekEndDate.getDate() + 6);
+      
+      if (dateObj >= weekStartDate && dateObj <= weekEndDate) {
+        return true;
+      }
+    }
+    return false;
   };
 
   const weekTotals = getWeekTotals();
@@ -156,7 +189,7 @@ export default function TimesheetPage() {
                     <div className="flex items-center gap-2 whitespace-nowrap">
                       <Calendar className="h-5 w-5 text-gray-600" />
                       <span className="text-sm font-medium text-gray-700">
-                        {days[(weekStart.getDay() + 6) % 7]}, {weekStart.getDate()} {months[weekStart.getMonth()].substring(0, 3)}&apos;{weekStart.getFullYear().toString().slice(-2)} to {days[(weekEnd.getDay() + 6) % 7]}, {weekEnd.getDate()} {months[weekEnd.getMonth()].substring(0, 3)}&apos;{weekEnd.getFullYear().toString().slice(-2)}
+                        {days[(weekStart.getDay() + 6) % 7]}, {weekStart.getDate()} {months[weekStart.getMonth()].substring(0, 3)}&apos;{weekStart.getFullYear().toString().slice(-2)} - {days[(weekEnd.getDay() + 6) % 7]}, {weekEnd.getDate()} {months[weekEnd.getMonth()].substring(0, 3)}&apos;{weekEnd.getFullYear().toString().slice(-2)}
                       </span>
                     </div>
                     <button onClick={nextWeek} className="p-1 hover:bg-gray-100 rounded transition-colors">
@@ -164,8 +197,9 @@ export default function TimesheetPage() {
                     </button>
                   </div>
                   <Button 
-                    className="bg-[#6B8BA8] hover:bg-[#5A7799] text-white gap-2"
+                    className="bg-[#033c59] hover:bg-[#022847] text-white gap-2"
                     onClick={() => setShowAddModal(true)}
+                    disabled={isWeekSubmitted}
                   >
                     <Plus className="h-4 w-4" />
                     Add Project
@@ -199,10 +233,10 @@ export default function TimesheetPage() {
                       </thead>
                       <tbody>
                         {projects.map((project) => (
-                          <tr key={project.id} className="border-b border-gray-200 hover:bg-gray-50">
+                          <tr key={project.id} className={`border-b border-gray-200 ${isWeekSubmitted ? 'bg-gray-100' : 'hover:bg-gray-50'}`}>
                             <td className="py-4 px-4 text-sm bg-gray-50">
-                              <div className="text-xs text-gray-600">{project.client}</div>
-                              <div className="font-bold text-gray-800 mt-1">{project.name}</div>
+                              <div className="font-bold text-gray-800">{project.name}</div>
+                              {project.saved && <div className="text-xs text-green-600 mt-1">Saved</div>}
                             </td>
                             {project.hours.map((hours, dayIdx) => (
                               <td key={dayIdx} className="text-center py-4 px-2">
@@ -210,7 +244,8 @@ export default function TimesheetPage() {
                                   type="number"
                                   value={hours}
                                   onChange={(e) => updateProjectHours(project.id, dayIdx, parseInt(e.target.value) || 0)}
-                                  className="w-12 px-2 py-1 text-center text-sm border border-gray-200 rounded [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                  disabled={project.saved || isWeekSubmitted}
+                                  className="w-12 px-2 py-1 text-center text-sm border border-gray-200 rounded disabled:bg-gray-100 disabled:cursor-not-allowed [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                   style={{ MozAppearance: 'textfield' }}
                                 />
                               </td>
@@ -221,7 +256,8 @@ export default function TimesheetPage() {
                             <td className="text-center py-4 px-2">
                               <button
                                 onClick={() => deleteProject(project.id)}
-                                className="text-gray-400 hover:text-red-600 transition-colors"
+                                disabled={project.saved || isWeekSubmitted}
+                                className={`transition-colors ${project.saved || isWeekSubmitted ? 'text-gray-300 cursor-not-allowed' : 'text-gray-400 hover:text-red-600'}`}
                               >
                                 ×
                               </button>
@@ -248,8 +284,27 @@ export default function TimesheetPage() {
                 {/* Action Buttons */}
                 {projects.length > 0 && (
                   <div className="flex justify-end gap-4 mt-6">
-                    <Button variant="outline" className="px-6">Save</Button>
-                    <Button className="bg-[#6B8BA8] hover:bg-[#5A7799] text-white px-6">Submit Timesheet</Button>
+                    <Button 
+                      variant="outline" 
+                      className="px-6"
+                      onClick={saveProjects}
+                      disabled={isWeekSubmitted}
+                    >
+                      Save
+                    </Button>
+                    <Button 
+                      className="bg-[#033c59] hover:bg-[#022847] text-white px-6"
+                      onClick={submitTimesheet}
+                      disabled={isWeekSubmitted}
+                    >
+                      Submit Timesheet
+                    </Button>
+                  </div>
+                )}
+
+                {isWeekSubmitted && (
+                  <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-center">
+                    <p className="text-sm text-amber-800 font-medium">This week has been submitted and is now locked.</p>
                   </div>
                 )}
               </Card>
@@ -286,6 +341,8 @@ export default function TimesheetPage() {
                           ? ""
                           : day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()
                           ? "bg-[#00AEEF] text-white font-bold cursor-pointer hover:bg-[#0099D8]"
+                          : isDateInSubmittedWeek(day)
+                          ? "bg-amber-400 text-white font-bold cursor-pointer hover:bg-amber-500"
                           : "text-gray-700 hover:bg-gray-100 cursor-pointer"
                       )}
                     >
@@ -299,19 +356,11 @@ export default function TimesheetPage() {
                   <h4 className="font-bold text-gray-800 text-sm mb-3">Status Legend</h4>
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-[#00AEEF]"></div>
-                    <span className="text-gray-700">Approved</span>
+                    <span className="text-gray-700">Today</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                    <div className="w-3 h-3 rounded-full bg-amber-400"></div>
                     <span className="text-gray-700">Submitted</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-blue-300"></div>
-                    <span className="text-gray-700">Draft</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                    <span className="text-gray-700">Rejected</span>
                   </div>
                 </div>
               </Card>
@@ -325,32 +374,13 @@ export default function TimesheetPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <Card className="w-full max-w-md p-6 bg-white border-none shadow-lg rounded-xl">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-800">Add New Project</h2>
+              <h2 className="text-lg font-bold" style={{ color: '#033c59' }}>Add New Project</h2>
               <button onClick={resetModal} className="text-gray-400 hover:text-gray-600">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <div className="space-y-4">
-              <div>
-                <Label htmlFor="client" className="text-sm font-medium text-gray-700">
-                  Client
-                </Label>
-                <select
-                  id="client"
-                  value={selectedClient}
-                  onChange={(e) => setSelectedClient(e.target.value)}
-                  className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select a client...</option>
-                  {clientOptions.map((client) => (
-                    <option key={client} value={client}>
-                      {client}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
               <div>
                 <Label htmlFor="project-name" className="text-sm font-medium text-gray-700">
                   Project Name
@@ -374,7 +404,8 @@ export default function TimesheetPage() {
             <div className="flex gap-3 mt-6">
               <Button
                 onClick={handleAddProject}
-                className="flex-1 bg-[#00AEEF] hover:bg-[#0099D8] text-white"
+                className="flex-1 text-white"
+                style={{ backgroundColor: '#033c59' }}
               >
                 Add Project
               </Button>
