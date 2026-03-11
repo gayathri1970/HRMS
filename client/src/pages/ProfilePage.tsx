@@ -13,6 +13,7 @@ import {
   Download,
   Plus,
   Pencil,
+  X,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import Header from "@/components/Header";
@@ -29,6 +30,9 @@ export default function ProfilePage() {
   const [editingAbout, setEditingAbout] = useState(false);
   const [editingAddress, setEditingAddress] = useState(false);
   const [editingEducation, setEditingEducation] = useState(false);
+  const [showAddSkill, setShowAddSkill] = useState(false);
+  const [newSkill, setNewSkill] = useState({ name: "", percentage: "" });
+  const [skills, setSkills] = useState<Array<{ name: string; percentage: string }>>([]);
 
   // Form data states
   const [basicDetails, setBasicDetails] = useState({
@@ -43,6 +47,7 @@ export default function ProfilePage() {
   });
   const [contactInfo, setContactInfo] = useState({
     mobileNumber: "7695838187",
+    officialEmail: "gayathri@novintix.com",
     personalEmail: "gayathrips1970@gmail.com",
     emergencyContact: "9942745200",
   });
@@ -81,6 +86,18 @@ export default function ProfilePage() {
     }
   };
 
+  const handleAddSkill = () => {
+    if (newSkill.name && newSkill.percentage) {
+      setSkills([...skills, newSkill]);
+      setNewSkill({ name: "", percentage: "" });
+      setShowAddSkill(false);
+    }
+  };
+
+  const handleRemoveSkill = (index: number) => {
+    setSkills(skills.filter((_, i) => i !== index));
+  };
+
   return (
     <div className="min-h-screen bg-[#F0F2F5] font-sans">
       <input
@@ -99,27 +116,8 @@ export default function ProfilePage() {
         <main className="flex-1 p-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column */}
           <div className="lg:col-span-4 flex flex-col gap-6">
-            {/* Main Profile Card */}
-            <Card className="overflow-hidden border-none shadow-sm rounded-xl">
-              <div className="h-24 bg-[#00AEEF]"></div>
-              <div className="px-6 pb-8 -mt-12 flex flex-col items-center text-center">
-                <Avatar className="h-28 w-28 border-4 border-white shadow-lg mb-4">
-                  <AvatarImage src={profilePhoto || ""} />
-                  <AvatarFallback className="bg-gray-100 text-gray-400 text-4xl">
-                    <User className="h-16 w-16" />
-                  </AvatarFallback>
-                </Avatar>
-                <h2 className="text-xl font-bold text-gray-900">
-                  {basicDetails.firstName} {basicDetails.lastName}
-                </h2>
-                <p className="text-[#00AEEF] bg-[#E1F5FE] px-4 py-1 rounded-full text-xs font-semibold mt-2">
-                  AI Intern
-                </p>
-              </div>
-            </Card>
-
             {/* Resume Section */}
-            <Card className="p-6 border-none shadow-sm rounded-xl flex items-center justify-between">
+            <Card className="p-6 border-none shadow-sm rounded-xl flex items-center justify-between bg-white">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-[#E1F5FE] rounded-lg">
                   <FileText className="h-5 w-5 text-[#00AEEF]" />
@@ -153,7 +151,7 @@ export default function ProfilePage() {
             </Card>
 
             {/* Basic Details */}
-            <Card className="p-6 border-none shadow-sm rounded-xl relative">
+            <Card className="p-6 border-none shadow-sm rounded-xl relative bg-white">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-gray-800">Basic Details</h3>
                 <Button
@@ -173,14 +171,9 @@ export default function ProfilePage() {
                     </Label>
                     <Input
                       value={basicDetails.employeeId}
-                      onChange={(e) =>
-                        setBasicDetails({
-                          ...basicDetails,
-                          employeeId: e.target.value,
-                        })
-                      }
                       placeholder="Enter Employee ID"
                       disabled
+                      className="bg-gray-50"
                     />
                   </div>
                   <div>
@@ -220,19 +213,15 @@ export default function ProfilePage() {
                     <Input
                       type="date"
                       value={basicDetails.dateOfJoining}
-                      onChange={(e) =>
-                        setBasicDetails({
-                          ...basicDetails,
-                          dateOfJoining: e.target.value,
-                        })
-                      }
+                      disabled
+                      className="bg-gray-50"
                     />
                   </div>
                   <div>
                     <Label className="text-xs uppercase mb-2 block text-gray-400">
                       Nationality
                     </Label>
-                    <Input
+                    <select
                       value={basicDetails.nationality}
                       onChange={(e) =>
                         setBasicDetails({
@@ -240,44 +229,20 @@ export default function ProfilePage() {
                           nationality: e.target.value,
                         })
                       }
-                      placeholder="Enter Nationality"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs uppercase mb-2 block text-gray-400">
-                      Date of Birth
-                    </Label>
-                    <Input
-                      type="date"
-                      value={basicDetails.dateOfBirth}
-                      onChange={(e) =>
-                        setBasicDetails({
-                          ...basicDetails,
-                          dateOfBirth: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs uppercase mb-2 block text-gray-400">
-                      Marital Status
-                    </Label>
-                    <Input
-                      value={basicDetails.maritalStatus}
-                      onChange={(e) =>
-                        setBasicDetails({
-                          ...basicDetails,
-                          maritalStatus: e.target.value,
-                        })
-                      }
-                      placeholder="Enter Marital Status"
-                    />
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
+                    >
+                      <option>Indian</option>
+                      <option>American</option>
+                      <option>British</option>
+                      <option>Canadian</option>
+                      <option>Other</option>
+                    </select>
                   </div>
                   <div>
                     <Label className="text-xs uppercase mb-2 block text-gray-400">
                       Religion
                     </Label>
-                    <Input
+                    <select
                       value={basicDetails.religion}
                       onChange={(e) =>
                         setBasicDetails({
@@ -285,8 +250,41 @@ export default function ProfilePage() {
                           religion: e.target.value,
                         })
                       }
-                      placeholder="Enter Religion"
-                    />
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF]"
+                    >
+                      <option>Hindu</option>
+                      <option>Muslim</option>
+                      <option>Christian</option>
+                      <option>Sikh</option>
+                      <option>Buddhist</option>
+                      <option>Other</option>
+                    </select>
+                  </div>
+                  <div className="col-span-2">
+                    <Label className="text-xs uppercase mb-2 block text-gray-400">
+                      Marital Status
+                    </Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {["Single", "Married"].map((status) => (
+                        <button
+                          key={status}
+                          onClick={() =>
+                            setBasicDetails({
+                              ...basicDetails,
+                              maritalStatus: status,
+                            })
+                          }
+                          className={cn(
+                            "py-2 px-4 rounded-md font-medium text-sm transition-colors",
+                            basicDetails.maritalStatus === status
+                              ? "bg-[#00AEEF] text-white"
+                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          )}
+                        >
+                          {status}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                   <div className="col-span-2 flex gap-2 pt-2">
                     <Button
@@ -311,19 +309,19 @@ export default function ProfilePage() {
                   <div>
                     <p className="text-gray-400 uppercase mb-1">Employee ID</p>
                     <p className="font-medium text-gray-700">
-                      {basicDetails.employeeId || "-"}
+                      {basicDetails.employeeId}
                     </p>
                   </div>
                   <div>
                     <p className="text-gray-400 uppercase mb-1">First Name</p>
                     <p className="font-medium text-gray-700">
-                      {basicDetails.firstName || "-"}
+                      {basicDetails.firstName}
                     </p>
                   </div>
                   <div>
                     <p className="text-gray-400 uppercase mb-1">Last Name</p>
                     <p className="font-medium text-gray-700">
-                      {basicDetails.lastName || "-"}
+                      {basicDetails.lastName}
                     </p>
                   </div>
                   <div>
@@ -331,35 +329,27 @@ export default function ProfilePage() {
                       Date of Joining
                     </p>
                     <p className="font-medium text-gray-700">
-                      {basicDetails.dateOfJoining || "-"}
+                      {basicDetails.dateOfJoining}
                     </p>
                   </div>
                   <div>
                     <p className="text-gray-400 uppercase mb-1">Nationality</p>
                     <p className="font-medium text-gray-700">
-                      {basicDetails.nationality || "-"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 uppercase mb-1">
-                      Date of Birth
-                    </p>
-                    <p className="font-medium text-gray-700">
-                      {basicDetails.dateOfBirth || "-"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 uppercase mb-1">
-                      Marital Status
-                    </p>
-                    <p className="font-medium text-gray-700">
-                      {basicDetails.maritalStatus || "-"}
+                      {basicDetails.nationality}
                     </p>
                   </div>
                   <div>
                     <p className="text-gray-400 uppercase mb-1">Religion</p>
                     <p className="font-medium text-gray-700">
-                      {basicDetails.religion || "-"}
+                      {basicDetails.religion}
+                    </p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-gray-400 uppercase mb-1">
+                      Marital Status
+                    </p>
+                    <p className="font-medium text-gray-700">
+                      {basicDetails.maritalStatus}
                     </p>
                   </div>
                 </div>
@@ -367,7 +357,7 @@ export default function ProfilePage() {
             </Card>
 
             {/* Contact Information */}
-            <Card className="p-6 border-none shadow-sm rounded-xl">
+            <Card className="p-6 border-none shadow-sm rounded-xl bg-white">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-gray-800">Contact Information</h3>
                 <Button
@@ -394,6 +384,17 @@ export default function ProfilePage() {
                         })
                       }
                       placeholder="Enter Mobile Number"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs uppercase mb-2 block text-gray-400">
+                      Official Email ID
+                    </Label>
+                    <Input
+                      type="email"
+                      value={contactInfo.officialEmail}
+                      disabled
+                      className="bg-gray-50"
                     />
                   </div>
                   <div>
@@ -452,7 +453,15 @@ export default function ProfilePage() {
                       Mobile Number
                     </p>
                     <p className="font-medium text-gray-700">
-                      {contactInfo.mobileNumber || "-"}
+                      {contactInfo.mobileNumber}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 uppercase mb-1">
+                      Official Email ID
+                    </p>
+                    <p className="font-medium text-gray-700">
+                      {contactInfo.officialEmail}
                     </p>
                   </div>
                   <div>
@@ -460,7 +469,7 @@ export default function ProfilePage() {
                       Personal Email ID
                     </p>
                     <p className="font-medium text-gray-700">
-                      {contactInfo.personalEmail || "-"}
+                      {contactInfo.personalEmail}
                     </p>
                   </div>
                   <div>
@@ -468,7 +477,7 @@ export default function ProfilePage() {
                       Emergency Contact
                     </p>
                     <p className="font-medium text-gray-700">
-                      {contactInfo.emergencyContact || "-"}
+                      {contactInfo.emergencyContact}
                     </p>
                   </div>
                 </div>
@@ -479,7 +488,7 @@ export default function ProfilePage() {
           {/* Middle Column */}
           <div className="lg:col-span-4 flex flex-col gap-6">
             {/* About Employee */}
-            <Card className="p-6 border-none shadow-sm rounded-xl flex flex-col min-h-[12rem]">
+            <Card className="p-6 border-none shadow-sm rounded-xl flex flex-col min-h-[12rem] bg-white">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-gray-800">About Employee</h3>
                 <Button
@@ -517,7 +526,7 @@ export default function ProfilePage() {
             </Card>
 
             {/* Address Details */}
-            <Card className="p-6 border-none shadow-sm rounded-xl">
+            <Card className="p-6 border-none shadow-sm rounded-xl bg-white">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-gray-800">Address Details</h3>
                 <Button
@@ -588,37 +597,37 @@ export default function ProfilePage() {
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-y-6 text-xs">
+                <div className="grid grid-cols-2 gap-y-4 text-xs">
                   <div className="col-span-2">
                     <p className="text-gray-400 uppercase mb-1">Address</p>
-                    <p className="font-medium text-gray-700">{addressInfo.address || "-"}</p>
+                    <p className="font-medium text-gray-700">{addressInfo.address}</p>
                   </div>
                   <div>
                     <p className="text-gray-400 uppercase mb-1">City</p>
-                    <p className="font-medium text-gray-700">{addressInfo.city || "-"}</p>
+                    <p className="font-medium text-gray-700">{addressInfo.city}</p>
                   </div>
                   <div>
                     <p className="text-gray-400 uppercase mb-1">State</p>
-                    <p className="font-medium text-gray-700">{addressInfo.state || "-"}</p>
+                    <p className="font-medium text-gray-700">{addressInfo.state}</p>
                   </div>
                   <div>
                     <p className="text-gray-400 uppercase mb-1">Pin Code</p>
-                    <p className="font-medium text-gray-700">{addressInfo.pincode || "-"}</p>
+                    <p className="font-medium text-gray-700">{addressInfo.pincode}</p>
                   </div>
                   <div>
                     <p className="text-gray-400 uppercase mb-1">Country</p>
-                    <p className="font-medium text-gray-700">{addressInfo.country || "-"}</p>
+                    <p className="font-medium text-gray-700">{addressInfo.country}</p>
                   </div>
                   <div className="col-span-2">
                     <p className="text-gray-400 uppercase mb-1">Work Location</p>
-                    <p className="font-medium text-gray-700">{addressInfo.workLocation || "-"}</p>
+                    <p className="font-medium text-gray-700">{addressInfo.workLocation}</p>
                   </div>
                 </div>
               )}
             </Card>
 
             {/* Identification Documents */}
-            <Card className="p-6 border-none shadow-sm rounded-xl">
+            <Card className="p-6 border-none shadow-sm rounded-xl bg-white">
               <h3 className="font-bold text-gray-800 mb-6">
                 Identification Documents
               </h3>
@@ -661,26 +670,121 @@ export default function ProfilePage() {
             </Card>
           </div>
 
-          {/* Right Column */}
+          {/* Right Column - User Card at Top */}
           <div className="lg:col-span-4 flex flex-col gap-6">
+            {/* Main Profile Card - Top Right */}
+            <Card className="overflow-hidden border-none shadow-sm rounded-xl bg-white">
+              <div className="h-24 bg-[#00AEEF]"></div>
+              <div className="px-6 pb-8 -mt-12 flex flex-col items-center text-center">
+                <Avatar className="h-28 w-28 border-4 border-white shadow-lg mb-4">
+                  <AvatarImage src={profilePhoto || ""} />
+                  <AvatarFallback className="bg-gray-100 text-gray-400 text-4xl">
+                    <User className="h-16 w-16" />
+                  </AvatarFallback>
+                </Avatar>
+                <h2 className="text-xl font-bold text-gray-900">
+                  {basicDetails.firstName} {basicDetails.lastName}
+                </h2>
+                <p className="text-[#00AEEF] bg-[#E1F5FE] px-4 py-1 rounded-full text-xs font-semibold mt-2">
+                  AI Intern
+                </p>
+              </div>
+            </Card>
+
             {/* Skills & Expertise */}
-            <Card className="p-6 border-none shadow-sm rounded-xl">
+            <Card className="p-6 border-none shadow-sm rounded-xl bg-white">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-gray-800">Skills & Expertise</h3>
                 <Button
                   size="sm"
                   className="bg-[#00AEEF] hover:bg-[#003B5C] h-8 gap-1"
+                  onClick={() => setShowAddSkill(!showAddSkill)}
                 >
                   <Plus className="h-3.5 w-3.5" /> Add
                 </Button>
               </div>
-              <div className="space-y-6">
-                <p className="text-gray-400 text-sm">No skills added yet</p>
+              
+              {showAddSkill && (
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <Label className="text-xs uppercase mb-2 block text-gray-400">
+                        Skill Name
+                      </Label>
+                      <Input
+                        value={newSkill.name}
+                        onChange={(e) =>
+                          setNewSkill({ ...newSkill, name: e.target.value })
+                        }
+                        placeholder="e.g., JavaScript"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs uppercase mb-2 block text-gray-400">
+                        Percentage
+                      </Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={newSkill.percentage}
+                        onChange={(e) =>
+                          setNewSkill({ ...newSkill, percentage: e.target.value })
+                        }
+                        placeholder="0-100"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      className="bg-[#00AEEF] hover:bg-[#003B5C] flex-1"
+                      onClick={handleAddSkill}
+                    >
+                      Add Skill
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => setShowAddSkill(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-3">
+                {skills.length === 0 ? (
+                  <p className="text-gray-400 text-sm">No skills added yet</p>
+                ) : (
+                  skills.map((skill, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-700">{skill.name}</p>
+                        <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                          <div
+                            className="bg-[#00AEEF] h-2 rounded-full"
+                            style={{ width: `${skill.percentage}%` }}
+                          ></div>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">{skill.percentage}%</p>
+                      </div>
+                      <button
+                        onClick={() => handleRemoveSkill(index)}
+                        className="ml-3 p-1 hover:bg-gray-200 rounded transition-colors"
+                      >
+                        <X className="h-4 w-4 text-gray-400 hover:text-red-600" />
+                      </button>
+                    </div>
+                  ))
+                )}
               </div>
             </Card>
 
             {/* Banking Details */}
-            <Card className="p-6 border-none shadow-sm rounded-xl">
+            <Card className="p-6 border-none shadow-sm rounded-xl bg-white">
               <h3 className="font-bold text-gray-800 mb-6">Banking Details</h3>
               <div className="grid grid-cols-2 gap-y-6 text-xs">
                 <div>
@@ -711,7 +815,7 @@ export default function ProfilePage() {
             </Card>
 
             {/* Passport Details */}
-            <Card className="p-6 border-none shadow-sm rounded-xl">
+            <Card className="p-6 border-none shadow-sm rounded-xl bg-white">
               <h3 className="font-bold text-gray-800 mb-6">Passport Details</h3>
               <div className="grid grid-cols-2 gap-y-6 text-xs">
                 <div>
@@ -738,11 +842,11 @@ export default function ProfilePage() {
 
           {/* Full Width Row - Insurance/Policy */}
           <div className="lg:col-span-8">
-            <Card className="p-6 border-none shadow-sm rounded-xl">
+            <Card className="p-6 border-none shadow-sm rounded-xl bg-white">
               <h3 className="font-bold text-gray-800 mb-6">
                 Insurance / Policy Details
               </h3>
-              <div className="grid grid-cols-4 gap-y-6 text-xs">
+              <div className="grid grid-cols-2 gap-y-6 text-xs">
                 <div>
                   <p className="text-gray-400 uppercase mb-1">Policy Number</p>
                   <p className="font-medium text-gray-700">-</p>
@@ -751,25 +855,13 @@ export default function ProfilePage() {
                   <p className="text-gray-400 uppercase mb-1">Member ID</p>
                   <p className="font-medium text-gray-700">-</p>
                 </div>
-                <div>
-                  <p className="text-gray-400 uppercase mb-1">
-                    Policy Start Date
-                  </p>
-                  <p className="font-medium text-gray-700">-</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 uppercase mb-1">
-                    Policy End Date
-                  </p>
-                  <p className="font-medium text-gray-700">-</p>
-                </div>
               </div>
             </Card>
           </div>
 
           {/* Education Documents */}
           <div className="lg:col-span-4">
-            <Card className="p-6 border-none shadow-sm rounded-xl">
+            <Card className="p-6 border-none shadow-sm rounded-xl bg-white">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-gray-800">Education Documents</h3>
                 <Button
@@ -780,21 +872,21 @@ export default function ProfilePage() {
                   <Pencil className="h-4 w-4" />
                 </Button>
               </div>
-              <div className="space-y-6 text-xs">
+              <div className="space-y-4 text-xs">
                 <div>
                   <p className="text-gray-400 uppercase mb-1">
                     Highest Level of Education
                   </p>
                   <p className="font-medium text-gray-700">-</p>
                 </div>
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 gap-2">
                   <div className="p-4 border border-dashed border-gray-200 rounded-lg flex items-center justify-center gap-2 cursor-pointer hover:bg-gray-50 transition-colors text-gray-400">
                     <Upload className="h-4 w-4" />
-                    <span>Schooling Certificate</span>
+                    <span className="text-xs">Schooling Certificate</span>
                   </div>
                   <div className="p-4 border border-dashed border-gray-200 rounded-lg flex items-center justify-center gap-2 cursor-pointer hover:bg-gray-50 transition-colors text-gray-400">
                     <Upload className="h-4 w-4" />
-                    <span>UG Degree Certificate</span>
+                    <span className="text-xs">UG Degree Certificate</span>
                   </div>
                 </div>
               </div>
