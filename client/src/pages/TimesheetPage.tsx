@@ -44,13 +44,13 @@ function cn(...classes: (string | boolean | undefined | null)[]) {
 }
 
 export default function TimesheetPage() {
-  const [weekStart, setWeekStart] = useState(new Date(2026, 2, 2));
+  const [today] = useState(new Date());
+  const [weekStart, setWeekStart] = useState(() => getMonday(new Date()));
   const [weekDataMap, setWeekDataMap] = useState<Record<string, WeekData>>({});
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedClient, setSelectedClient] = useState("");
   const [selectedProject, setSelectedProject] = useState("");
-  const [calDate, setCalDate] = useState(new Date(2026, 2));
-  const [today] = useState(new Date(2026, 2, 11));
+  const [calDate, setCalDate] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth()));
 
   /* ── derived from weekStart ─────────────────────────────────── */
   const curKey = weekKey(weekStart);
@@ -97,13 +97,9 @@ export default function TimesheetPage() {
   const grandTotal = dayTotals.reduce((s, h) => s + h, 0);
   const rowTotal = (p: Project) => p.hours.reduce((s, h) => s + h, 0);
 
-  /* ── global status counts (hours across all weeks) ──────────── */
-  const draftHours = Object.values(weekDataMap)
-    .filter(w => w.status === "draft")
-    .reduce((s, w) => s + w.projects.reduce((ps, p) => ps + p.hours.reduce((hs, h) => hs + h, 0), 0), 0);
-  const submittedHours = Object.values(weekDataMap)
-    .filter(w => w.status === "submitted")
-    .reduce((s, w) => s + w.projects.reduce((ps, p) => ps + p.hours.reduce((hs, h) => hs + h, 0), 0), 0);
+  /* ── global status counts (number of submitted/draft days) ─── */
+  const submittedDays = Object.values(weekDataMap).filter(w => w.status === "submitted").length * 7;
+  const draftDays = Object.values(weekDataMap).filter(w => w.status === "draft").length * 7;
 
   /* ── calendar ───────────────────────────────────────────────── */
   const calMonth = calDate.getMonth();
@@ -316,7 +312,7 @@ export default function TimesheetPage() {
                 {isSubmitted && (
                   <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-center">
                     <p className="text-sm text-amber-800 font-medium">
-                      This week has been submitted and is now locked.
+                      This week has been submitted and it can not be edited.
                     </p>
                   </div>
                 )}
@@ -325,25 +321,25 @@ export default function TimesheetPage() {
 
             {/* ══ Calendar panel ══ */}
             <div className="lg:col-span-1">
-              <Card className="p-5 bg-white border-none shadow-sm rounded-xl">
+              <Card className="p-4 bg-white border-none shadow-sm rounded-xl">
 
                 {/* Month nav */}
-                <div className="flex items-center justify-between mb-4">
-                  <button onClick={() => setCalDate(new Date(calYear, calMonth - 1))} className="p-1 hover:bg-gray-100 rounded">
-                    <ChevronLeft className="h-4 w-4 text-gray-600" />
+                <div className="flex items-center justify-between mb-2">
+                  <button onClick={() => setCalDate(new Date(calYear, calMonth - 1))} className="p-0.5 hover:bg-gray-100 rounded">
+                    <ChevronLeft className="h-3.5 w-3.5 text-gray-500" />
                   </button>
-                  <h3 className="font-bold text-gray-800 text-sm">{MONTHS[calMonth]} {calYear}</h3>
-                  <button onClick={() => setCalDate(new Date(calYear, calMonth + 1))} className="p-1 hover:bg-gray-100 rounded">
-                    <ChevronRight className="h-4 w-4 text-gray-600" />
+                  <h3 className="font-semibold text-gray-700 text-xs">{MONTHS[calMonth]} {calYear}</h3>
+                  <button onClick={() => setCalDate(new Date(calYear, calMonth + 1))} className="p-0.5 hover:bg-gray-100 rounded">
+                    <ChevronRight className="h-3.5 w-3.5 text-gray-500" />
                   </button>
                 </div>
 
                 {/* Day headers */}
-                <div className="grid grid-cols-7 gap-1 mb-1">
-                  {["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map((d, i) => (
+                <div className="grid grid-cols-7 gap-0.5 mb-0.5">
+                  {["M","T","W","T","F","S","S"].map((d, i) => (
                     <div
-                      key={d}
-                      className="text-center text-xs font-bold text-gray-500 py-1 rounded"
+                      key={i}
+                      className="text-center text-xs font-semibold text-gray-400 py-0.5 rounded"
                       style={i >= 5 ? { backgroundColor: "#EEEEEE" } : {}}
                     >
                       {d}
@@ -352,9 +348,22 @@ export default function TimesheetPage() {
                 </div>
 
                 {/* Calendar cells */}
-                <div className="grid grid-cols-7 gap-1 mb-5">
+                <div className="grid grid-cols-7 gap-0.5 mb-4">
                   {calCells.map((day, idx) => {
                     const weekend = isSatOrSun(idx);
+                    // Sat/Sun always stay #EEEEEE — never overridden by status
+                    if (weekend) {
+                      return (
+                        <div
+                          key={idx}
+                          className="aspect-square flex items-center justify-center text-xs rounded text-gray-400"
+                          style={{ backgroundColor: "#EEEEEE" }}
+                        >
+                          {day}
+                        </div>
+                      );
+                    }
+
                     const todayCell = day !== null && isToday(day);
                     const submittedCell = day !== null && isInSubmittedWeek(day);
                     const draftCell = day !== null && !submittedCell && isInDraftWeek(day);
@@ -366,19 +375,17 @@ export default function TimesheetPage() {
                     if (todayCell) { bg = "#00AEEF"; textCls = "text-white"; fontBold = true; }
                     else if (submittedCell) { bg = "#F59E0B"; textCls = "text-white"; fontBold = true; }
                     else if (draftCell) { bg = "#93C5FD"; textCls = "text-white"; fontBold = true; }
-                    else if (weekend && day !== null) { bg = "#EEEEEE"; }
-                    else if (weekend) { bg = "#EEEEEE"; }
 
                     return (
                       <div
                         key={idx}
                         className={cn(
                           "aspect-square flex items-center justify-center text-xs rounded transition-colors",
-                          !bg && !weekend && day !== null && "hover:bg-gray-100 cursor-pointer",
+                          !bg && day !== null && "hover:bg-gray-100 cursor-pointer",
                           textCls,
                           fontBold && "font-bold"
                         )}
-                        style={bg ? { backgroundColor: bg } : weekend ? { backgroundColor: "#EEEEEE" } : {}}
+                        style={bg ? { backgroundColor: bg } : {}}
                       >
                         {day}
                       </div>
@@ -387,8 +394,8 @@ export default function TimesheetPage() {
                 </div>
 
                 {/* Status Legend */}
-                <div className="space-y-2.5">
-                  <p className="font-bold text-gray-800 text-sm">Status Legend</p>
+                <div className="space-y-1.5">
+                  <p className="font-semibold text-gray-700 text-xs mb-2">Status Legend</p>
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -411,7 +418,7 @@ export default function TimesheetPage() {
                       <span className="w-3 h-3 rounded-full inline-block bg-amber-400" />
                       <span className="text-xs text-gray-600">Submitted</span>
                     </div>
-                    <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded-full">{submittedHours}</span>
+                    <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded-full">{submittedDays}</span>
                   </div>
 
                   <div className="flex items-center justify-between">
@@ -419,7 +426,7 @@ export default function TimesheetPage() {
                       <span className="w-3 h-3 rounded-full inline-block bg-blue-300" />
                       <span className="text-xs text-gray-600">Draft</span>
                     </div>
-                    <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded-full">{draftHours}</span>
+                    <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded-full">{draftDays}</span>
                   </div>
                 </div>
               </Card>
