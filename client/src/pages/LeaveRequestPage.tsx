@@ -228,13 +228,13 @@ export default function LeaveRequestPage() {
 
   /* ══ render ═══════════════════════════════════════════════════════ */
   return (
-    <div className="min-h-screen bg-[#F0F2F5] font-sans">
+    <div className="h-screen flex flex-col bg-[#F0F2F5] font-sans overflow-hidden">
       <Header title="Leave Request" />
 
-      <div className="flex">
+      <div className="flex flex-1 overflow-hidden">
         <Sidebar />
 
-        <main className="flex-1 p-6">
+        <main className="flex-1 overflow-y-auto p-6">
           {/* ── top action bar ─────────────────────────────────── */}
           <div className="flex justify-end mb-4">
             <button

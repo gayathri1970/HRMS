@@ -52,18 +52,15 @@ export default function TimesheetPage() {
   const [selectedProject, setSelectedProject] = useState("");
   const [calDate, setCalDate] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth()));
 
-  /* ── derived from weekStart ─────────────────────────────────── */
   const curKey = weekKey(weekStart);
   const weekEnd = (() => { const e = new Date(weekStart); e.setDate(e.getDate() + 6); return e; })();
   const curWeek: WeekData = weekDataMap[curKey] ?? { projects: [], status: "none" };
   const projects = curWeek.projects;
   const isSubmitted = curWeek.status === "submitted";
 
-  /* ── navigation ─────────────────────────────────────────────── */
   const prevWeek = () => setWeekStart(ws => { const d = new Date(ws); d.setDate(d.getDate() - 7); return getMonday(d); });
   const nextWeek = () => setWeekStart(ws => { const d = new Date(ws); d.setDate(d.getDate() + 7); return getMonday(d); });
 
-  /* ── mutations ──────────────────────────────────────────────── */
   const patchWeek = (patch: Partial<WeekData>) =>
     setWeekDataMap(m => ({ ...m, [curKey]: { ...curWeek, ...patch } }));
 
@@ -80,28 +77,21 @@ export default function TimesheetPage() {
     patchWeek({ projects: projects.map(p => p.id === id ? { ...p, hours: p.hours.map((h, i) => i === dayIdx ? val : h) } : p) });
   };
 
-  /* Clear all hours in a row (does not delete the row) */
   const clearRow = (id: string) => {
     if (isSubmitted) return;
     patchWeek({ projects: projects.map(p => p.id === id ? { ...p, hours: Array(7).fill(0) } : p) });
   };
 
-  /* Save → draft (stays editable) */
   const handleSave = () => patchWeek({ status: "draft" });
-
-  /* Submit → locked */
   const handleSubmit = () => patchWeek({ status: "submitted" });
 
-  /* ── totals ─────────────────────────────────────────────────── */
   const dayTotals = Array.from({ length: 7 }, (_, i) => projects.reduce((s, p) => s + p.hours[i], 0));
   const grandTotal = dayTotals.reduce((s, h) => s + h, 0);
   const rowTotal = (p: Project) => p.hours.reduce((s, h) => s + h, 0);
 
-  /* ── global status counts (number of submitted/draft days) ─── */
   const submittedDays = Object.values(weekDataMap).filter(w => w.status === "submitted").length * 7;
   const draftDays = Object.values(weekDataMap).filter(w => w.status === "draft").length * 7;
 
-  /* ── calendar ───────────────────────────────────────────────── */
   const calMonth = calDate.getMonth();
   const calYear = calDate.getFullYear();
   const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
@@ -133,17 +123,17 @@ export default function TimesheetPage() {
   const isToday = (day: number) => day === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear();
   const isSatOrSun = (cellIdx: number) => cellIdx % 7 === 5 || cellIdx % 7 === 6;
 
-  /* ── week label ─────────────────────────────────────────────── */
   const fmtLabel = (d: Date) => `${DAYS[(d.getDay() + 6) % 7]}, ${d.getDate()} ${MONTHS[d.getMonth()].slice(0, 3)}'${String(d.getFullYear()).slice(-2)}`;
 
   return (
-    <div className="min-h-screen bg-[#F0F2F5] font-sans">
+    <div className="h-screen flex flex-col bg-[#F0F2F5] font-sans overflow-hidden">
       <Header title="Timesheet" />
 
-      <div className="flex">
+      <div className="flex flex-1 overflow-hidden">
         <Sidebar />
 
-        <main className="flex-1 p-6">
+        {/* Only the content area scrolls */}
+        <main className="flex-1 overflow-y-auto p-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
             {/* ══ Timesheet card ══ */}
@@ -178,136 +168,130 @@ export default function TimesheetPage() {
                   </Button>
                 </div>
 
-                {/* Empty state */}
-                {projects.length === 0 ? (
-                  <div className="text-center py-14">
-                    <p className="text-gray-500">No time sheets found for this week range</p>
-                    <p className="text-gray-400 text-sm mt-1">Click "Add Project" to create a timesheet entry</p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse text-sm">
-                      <thead>
+                {/* Table — always rendered so Total Hours row is always visible */}
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse text-sm">
+                    <thead>
+                      <tr>
+                        <th className="text-left py-3 px-4 font-semibold text-white rounded-tl-lg"
+                            style={{ backgroundColor: "#033c59" }}>
+                          Project Name
+                        </th>
+                        {DAYS.map((day, idx) => {
+                          const d = new Date(weekStart);
+                          d.setDate(d.getDate() + idx);
+                          return (
+                            <th key={day} className="text-center py-3 px-2 font-semibold text-white text-xs whitespace-nowrap"
+                                style={{ backgroundColor: "#033c59" }}>
+                              {day} {MONTHS[d.getMonth()].slice(0, 3)} {d.getDate()}
+                            </th>
+                          );
+                        })}
+                        <th className="text-center py-3 px-2 font-semibold text-white text-xs"
+                            style={{ backgroundColor: "#033c59" }}>
+                          Total
+                        </th>
+                        <th className="py-3 px-2 text-center font-semibold text-white text-xs rounded-tr-lg"
+                            style={{ backgroundColor: "#033c59" }}>
+                          Clear
+                        </th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {/* Empty state row — shown only when no projects */}
+                      {projects.length === 0 && (
                         <tr>
-                          <th className="text-left py-3 px-4 font-semibold text-white rounded-tl-lg"
-                              style={{ backgroundColor: "#033c59" }}>
-                            Project Name
-                          </th>
-                          {DAYS.map((day, idx) => {
-                            const d = new Date(weekStart);
-                            d.setDate(d.getDate() + idx);
-                            return (
-                              <th key={day} className="text-center py-3 px-2 font-semibold text-white text-xs whitespace-nowrap"
-                                  style={{ backgroundColor: "#033c59" }}>
-                                {day} {MONTHS[d.getMonth()].slice(0, 3)} {d.getDate()}
-                              </th>
-                            );
-                          })}
-                          <th className="text-center py-3 px-2 font-semibold text-white text-xs"
-                              style={{ backgroundColor: "#033c59" }}>
-                            Total
-                          </th>
-                          {/* Clear column header */}
-                          <th className="py-3 px-2 text-center font-semibold text-white text-xs rounded-tr-lg"
-                              style={{ backgroundColor: "#033c59" }}>
-                            Clear
-                          </th>
+                          <td colSpan={10} className="py-10 text-center">
+                            <p className="text-gray-500">No time sheets found for this week range</p>
+                            <p className="text-gray-400 text-sm mt-1">Click "Add Project" to create a timesheet entry</p>
+                          </td>
                         </tr>
-                      </thead>
+                      )}
 
-                      <tbody>
-                        {projects.map((project) => (
-                          <tr key={project.id} className="border-b border-gray-100 hover:bg-gray-50">
-                            {/* Project name */}
-                            <td className="py-3 px-4 bg-gray-50 align-middle">
-                              <div className="font-semibold text-gray-800">{project.name}</div>
-                              {curWeek.status === "draft" && (
-                                <div className="text-xs text-blue-500 mt-0.5">Draft</div>
-                              )}
-                            </td>
-
-                            {/* Hour inputs — no per-cell clear button */}
-                            {project.hours.map((hours, dayIdx) => (
-                              <td key={dayIdx} className="text-center py-3 px-2 align-middle">
-                                <input
-                                  type="text"
-                                  inputMode="numeric"
-                                  value={hours === 0 ? "" : String(hours)}
-                                  placeholder="0"
-                                  readOnly={isSubmitted}
-                                  onChange={(e) => {
-                                    const v = parseInt(e.target.value) || 0;
-                                    updateHours(project.id, dayIdx, v);
-                                  }}
-                                  className={cn(
-                                    "w-11 px-1 py-1 text-center text-sm border rounded focus:outline-none focus:ring-1 focus:ring-blue-400",
-                                    isSubmitted
-                                      ? "bg-gray-100 border-gray-200 cursor-not-allowed text-gray-500"
-                                      : "border-gray-300 bg-white"
-                                  )}
-                                />
-                              </td>
-                            ))}
-
-                            {/* Row total */}
-                            <td className="text-center py-3 px-2 font-bold text-gray-700 align-middle">
-                              {rowTotal(project)}
-                            </td>
-
-                            {/* Single Clear button per row */}
-                            <td className="text-center py-3 px-2 align-middle">
-                              <button
-                                onClick={() => clearRow(project.id)}
-                                disabled={isSubmitted}
-                                title="Clear all hours"
+                      {/* Project rows */}
+                      {projects.map((project) => (
+                        <tr key={project.id} className="border-b border-gray-100 hover:bg-gray-50">
+                          <td className="py-3 px-4 bg-gray-50 align-middle">
+                            <div className="font-semibold text-gray-800">{project.name}</div>
+                            {curWeek.status === "draft" && (
+                              <div className="text-xs text-blue-500 mt-0.5">Draft</div>
+                            )}
+                          </td>
+                          {project.hours.map((hours, dayIdx) => (
+                            <td key={dayIdx} className="text-center py-3 px-2 align-middle">
+                              <input
+                                type="text"
+                                inputMode="numeric"
+                                value={hours === 0 ? "" : String(hours)}
+                                placeholder="0"
+                                readOnly={isSubmitted}
+                                onChange={(e) => {
+                                  const v = parseInt(e.target.value) || 0;
+                                  updateHours(project.id, dayIdx, v);
+                                }}
                                 className={cn(
-                                  "text-xs font-medium px-2 py-1 rounded border transition-colors",
+                                  "w-11 px-1 py-1 text-center text-sm border rounded focus:outline-none focus:ring-1 focus:ring-blue-400",
                                   isSubmitted
-                                    ? "text-gray-300 border-gray-200 cursor-not-allowed"
-                                    : "text-red-500 border-red-300 hover:bg-red-50"
+                                    ? "bg-gray-100 border-gray-200 cursor-not-allowed text-gray-500"
+                                    : "border-gray-300 bg-white"
                                 )}
-                              >
-                                Clear
-                              </button>
+                              />
                             </td>
-                          </tr>
-                        ))}
-
-                        {/* Totals row */}
-                        <tr className="bg-gray-100 font-bold text-gray-800">
-                          <td className="py-3 px-4">Total Hours</td>
-                          {dayTotals.map((t, i) => (
-                            <td key={i} className="text-center py-3 px-2">{t}</td>
                           ))}
-                          <td className="text-center py-3 px-2">{grandTotal}</td>
-                          <td />
+                          <td className="text-center py-3 px-2 font-bold text-gray-700 align-middle">
+                            {rowTotal(project)}
+                          </td>
+                          <td className="text-center py-3 px-2 align-middle">
+                            <button
+                              onClick={() => clearRow(project.id)}
+                              disabled={isSubmitted}
+                              title="Clear all hours"
+                              className={cn(
+                                "text-xs font-medium px-2 py-1 rounded border transition-colors",
+                                isSubmitted
+                                  ? "text-gray-300 border-gray-200 cursor-not-allowed"
+                                  : "text-red-500 border-red-300 hover:bg-red-50"
+                              )}
+                            >
+                              Clear
+                            </button>
+                          </td>
                         </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                      ))}
 
-                {/* Action buttons */}
-                {projects.length > 0 && (
-                  <div className="flex justify-end gap-3 mt-5">
-                    <Button
-                      variant="outline"
-                      className="px-6"
-                      onClick={handleSave}
-                      disabled={isSubmitted}
-                    >
-                      Save Draft
-                    </Button>
-                    <Button
-                      className="px-6 text-white"
-                      style={{ backgroundColor: "#033c59" }}
-                      onClick={handleSubmit}
-                      disabled={isSubmitted}
-                    >
-                      Submit Timesheet
-                    </Button>
-                  </div>
-                )}
+                      {/* Total Hours row — always visible */}
+                      <tr className="bg-gray-100 font-bold text-gray-800">
+                        <td className="py-3 px-4">Total Hours</td>
+                        {dayTotals.map((t, i) => (
+                          <td key={i} className="text-center py-3 px-2">{t}</td>
+                        ))}
+                        <td className="text-center py-3 px-2">{grandTotal}</td>
+                        <td />
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Action buttons — always visible, disabled when no entries or submitted */}
+                <div className="flex justify-end gap-3 mt-5">
+                  <Button
+                    variant="outline"
+                    className="px-6"
+                    onClick={handleSave}
+                    disabled={projects.length === 0 || isSubmitted}
+                  >
+                    Save Draft
+                  </Button>
+                  <Button
+                    className="px-6 text-white"
+                    style={{ backgroundColor: "#033c59" }}
+                    onClick={handleSubmit}
+                    disabled={projects.length === 0 || isSubmitted}
+                  >
+                    Submit Timesheet
+                  </Button>
+                </div>
 
                 {isSubmitted && (
                   <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-center">
@@ -319,27 +303,27 @@ export default function TimesheetPage() {
               </Card>
             </div>
 
-            {/* ══ Calendar panel ══ */}
+            {/* ══ Calendar panel — compact ══ */}
             <div className="lg:col-span-1">
-              <Card className="p-4 bg-white border-none shadow-sm rounded-xl">
+              <Card className="p-3 bg-white border-none shadow-sm rounded-xl">
 
                 {/* Month nav */}
                 <div className="flex items-center justify-between mb-2">
                   <button onClick={() => setCalDate(new Date(calYear, calMonth - 1))} className="p-0.5 hover:bg-gray-100 rounded">
-                    <ChevronLeft className="h-3.5 w-3.5 text-gray-500" />
+                    <ChevronLeft className="h-3 w-3 text-gray-500" />
                   </button>
                   <h3 className="font-semibold text-gray-700 text-xs">{MONTHS[calMonth]} {calYear}</h3>
                   <button onClick={() => setCalDate(new Date(calYear, calMonth + 1))} className="p-0.5 hover:bg-gray-100 rounded">
-                    <ChevronRight className="h-3.5 w-3.5 text-gray-500" />
+                    <ChevronRight className="h-3 w-3 text-gray-500" />
                   </button>
                 </div>
 
                 {/* Day headers */}
-                <div className="grid grid-cols-7 gap-0.5 mb-0.5">
+                <div className="grid grid-cols-7 gap-px mb-px">
                   {["M","T","W","T","F","S","S"].map((d, i) => (
                     <div
                       key={i}
-                      className="text-center text-xs font-semibold text-gray-400 py-0.5 rounded"
+                      className="text-center text-[10px] font-semibold text-gray-400 py-0.5 rounded"
                       style={i >= 5 ? { backgroundColor: "#EEEEEE" } : {}}
                     >
                       {d}
@@ -348,15 +332,14 @@ export default function TimesheetPage() {
                 </div>
 
                 {/* Calendar cells */}
-                <div className="grid grid-cols-7 gap-0.5 mb-4">
+                <div className="grid grid-cols-7 gap-px mb-3">
                   {calCells.map((day, idx) => {
                     const weekend = isSatOrSun(idx);
-                    // Sat/Sun always stay #EEEEEE — never overridden by status
                     if (weekend) {
                       return (
                         <div
                           key={idx}
-                          className="aspect-square flex items-center justify-center text-xs rounded text-gray-400"
+                          className="flex items-center justify-center text-[10px] rounded text-gray-400 h-6"
                           style={{ backgroundColor: "#EEEEEE" }}
                         >
                           {day}
@@ -380,7 +363,7 @@ export default function TimesheetPage() {
                       <div
                         key={idx}
                         className={cn(
-                          "aspect-square flex items-center justify-center text-xs rounded transition-colors",
+                          "flex items-center justify-center text-[10px] rounded transition-colors h-6",
                           !bg && day !== null && "hover:bg-gray-100 cursor-pointer",
                           textCls,
                           fontBold && "font-bold"
@@ -394,39 +377,39 @@ export default function TimesheetPage() {
                 </div>
 
                 {/* Status Legend */}
-                <div className="space-y-1.5">
-                  <p className="font-semibold text-gray-700 text-xs mb-2">Status Legend</p>
+                <div className="space-y-1 border-t border-gray-100 pt-2">
+                  <p className="font-semibold text-gray-700 text-[10px] mb-1.5">Status Legend</p>
 
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-full inline-block bg-green-500" />
-                      <span className="text-xs text-gray-600">Approved</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full inline-block bg-green-500 flex-shrink-0" />
+                      <span className="text-[10px] text-gray-600">Approved</span>
                     </div>
-                    <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded-full">0</span>
+                    <span className="text-[10px] font-semibold text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded-full">0</span>
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-full inline-block bg-red-500" />
-                      <span className="text-xs text-gray-600">Rejected</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full inline-block bg-red-500 flex-shrink-0" />
+                      <span className="text-[10px] text-gray-600">Rejected</span>
                     </div>
-                    <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded-full">0</span>
+                    <span className="text-[10px] font-semibold text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded-full">0</span>
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-full inline-block bg-amber-400" />
-                      <span className="text-xs text-gray-600">Submitted</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full inline-block bg-amber-400 flex-shrink-0" />
+                      <span className="text-[10px] text-gray-600">Submitted</span>
                     </div>
-                    <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded-full">{submittedDays}</span>
+                    <span className="text-[10px] font-semibold text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded-full">{submittedDays}</span>
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-full inline-block bg-blue-300" />
-                      <span className="text-xs text-gray-600">Draft</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full inline-block bg-blue-300 flex-shrink-0" />
+                      <span className="text-[10px] text-gray-600">Draft</span>
                     </div>
-                    <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded-full">{draftDays}</span>
+                    <span className="text-[10px] font-semibold text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded-full">{draftDays}</span>
                   </div>
                 </div>
               </Card>
