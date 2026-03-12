@@ -6,33 +6,101 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  User,
-  FileText,
-  Upload,
-  Download,
-  Plus,
-  Pencil,
-  X,
-} from "lucide-react";
+import { User, FileText, Upload, Download, Plus, Pencil, X } from "lucide-react";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 
 const STORAGE_KEY = "profileData";
 
+function FieldRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">{label}</p>
+      <p className="text-sm font-medium text-gray-700">{value || "-"}</p>
+    </div>
+  );
+}
+
+function SectionInput({
+  label,
+  value,
+  onChange,
+  disabled,
+  type = "text",
+  readOnly,
+}: {
+  label: string;
+  value: string;
+  onChange?: (v: string) => void;
+  disabled?: boolean;
+  type?: string;
+  readOnly?: boolean;
+}) {
+  return (
+    <div>
+      <Label className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1.5 block">
+        {label}
+      </Label>
+      <Input
+        type={type}
+        value={value}
+        onChange={onChange ? (e) => onChange(e.target.value) : undefined}
+        disabled={disabled || readOnly}
+        className={disabled || readOnly ? "bg-gray-50 text-gray-500" : ""}
+      />
+      {readOnly && <p className="text-[10px] text-gray-400 mt-0.5 italic">Read-only</p>}
+    </div>
+  );
+}
+
+function SectionSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+}) {
+  return (
+    <div>
+      <Label className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1.5 block">
+        {label}
+      </Label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00AEEF] bg-white"
+      >
+        {options.map((o) => (
+          <option key={o}>{o}</option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 export default function ProfilePage() {
-  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
-  const [editingBasicDetails, setEditingBasicDetails] = useState(false);
-  const [editingContactInfo, setEditingContactInfo] = useState(false);
-  const [editingAbout, setEditingAbout] = useState(false);
-  const [editingAddress, setEditingAddress] = useState(false);
-  const [editingFamily, setEditingFamily] = useState(false);
+  // edit toggles
+  const [editBasic, setEditBasic] = useState(false);
+  const [editContact, setEditContact] = useState(false);
+  const [editAbout, setEditAbout] = useState(false);
+  const [editAddress, setEditAddress] = useState(false);
+  const [editFamily, setEditFamily] = useState(false);
+  const [editIdDocs, setEditIdDocs] = useState(false);
+  const [editBanking, setEditBanking] = useState(false);
+  const [editPassport, setEditPassport] = useState(false);
+  const [editInsurance, setEditInsurance] = useState(false);
+  const [editEducation, setEditEducation] = useState(false);
   const [showAddSkill, setShowAddSkill] = useState(false);
   const [newSkill, setNewSkill] = useState({ name: "", percentage: "" });
-  const [skills, setSkills] = useState<Array<{ name: string; percentage: string }>>([]);
 
+  // data state
+  const [skills, setSkills] = useState<{ name: string; percentage: string }[]>([]);
   const [basicDetails, setBasicDetails] = useState({
     employeeId: "GP001",
     firstName: "Gayathri",
@@ -42,16 +110,13 @@ export default function ProfilePage() {
     religion: "Hindu",
     maritalStatus: "Single",
   });
-
   const [contactInfo, setContactInfo] = useState({
     mobileNumber: "7695838187",
     officialEmail: "gayathri@novintix.com",
     personalEmail: "gayathrips1970@gmail.com",
     emergencyContact: "9942745200",
   });
-
   const [aboutText, setAboutText] = useState("");
-
   const [addressInfo, setAddressInfo] = useState({
     address: "Narasingapuram, Thuraiyur",
     city: "Tiruchirappalli",
@@ -60,488 +125,435 @@ export default function ProfilePage() {
     pincode: "621008",
     workLocation: "Coimbatore",
   });
-
   const [familyInfo, setFamilyInfo] = useState({
     spouseName: "",
     spouseRole: "",
     spouseOrganization: "",
     numberOfChildren: "",
   });
+  const [professionalDocs, setProfessionalDocs] = useState<{
+    relieving: File | null;
+    experience: File | null;
+  }>({ relieving: null, experience: null });
 
-  const [professionalDocs, setProfessionalDocs] = useState({
-    relieving: null as File | null,
-    experience: null as File | null,
+  // new cards state
+  const [idDocs, setIdDocs] = useState({
+    nationalIdType: "",
+    nationalIdNumber: "",
+    taxIdType: "",
+    taxIdNumber: "",
+  });
+  const [banking, setBanking] = useState({
+    bankName: "",
+    accountNumber: "",
+    ifscCode: "",
+    branch: "",
+  });
+  const [passport, setPassport] = useState({
+    hasPassport: "No",
+    passportNumber: "",
+    passportExpiry: "",
+  });
+  const [insurance, setInsurance] = useState({
+    policyNumber: "",
+    memberId: "",
+  });
+  const [education, setEducation] = useState({
+    highestLevel: "",
+    institution: "",
+    yearOfPassing: "",
+    specialization: "",
   });
 
-  // Load from localStorage on mount
+  // Load localStorage
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      const data = JSON.parse(stored);
-      if (data.basicDetails) setBasicDetails(data.basicDetails);
-      if (data.contactInfo) setContactInfo(data.contactInfo);
-      if (data.aboutText) setAboutText(data.aboutText);
-      if (data.addressInfo) setAddressInfo(data.addressInfo);
-      if (data.familyInfo) setFamilyInfo(data.familyInfo);
-      if (data.skills) setSkills(data.skills);
+      const d = JSON.parse(stored);
+      if (d.basicDetails) setBasicDetails(d.basicDetails);
+      if (d.contactInfo) setContactInfo(d.contactInfo);
+      if (d.aboutText) setAboutText(d.aboutText);
+      if (d.addressInfo) setAddressInfo(d.addressInfo);
+      if (d.familyInfo) setFamilyInfo(d.familyInfo);
+      if (d.skills) setSkills(d.skills);
+      if (d.idDocs) setIdDocs(d.idDocs);
+      if (d.banking) setBanking(d.banking);
+      if (d.passport) setPassport(d.passport);
+      if (d.insurance) setInsurance(d.insurance);
+      if (d.education) setEducation(d.education);
     }
   }, []);
 
-  // Save to localStorage
-  const saveToLocalStorage = () => {
-    const data = {
-      basicDetails,
-      contactInfo,
-      aboutText,
-      addressInfo,
-      familyInfo,
-      skills,
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  };
-
-  const handleUploadClick = () => {
-    document.getElementById("resume-upload")?.click();
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setUploadedFile(file);
-    }
-  };
-
-  const handleDownloadClick = () => {
-    if (uploadedFile) {
-      const url = URL.createObjectURL(uploadedFile);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = uploadedFile.name;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    }
-  };
-
-  const handleAddSkill = () => {
-    if (newSkill.name && newSkill.percentage) {
-      const updatedSkills = [...skills, newSkill];
-      setSkills(updatedSkills);
-      setNewSkill({ name: "", percentage: "" });
-      setShowAddSkill(false);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+  const persist = (overrides: Record<string, unknown> = {}) => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
         basicDetails,
         contactInfo,
         aboutText,
         addressInfo,
         familyInfo,
-        skills: updatedSkills,
-      }));
-    }
+        skills,
+        idDocs,
+        banking,
+        passport,
+        insurance,
+        education,
+        ...overrides,
+      })
+    );
   };
 
-  const handleRemoveSkill = (index: number) => {
-    const updatedSkills = skills.filter((_, i) => i !== index);
-    setSkills(updatedSkills);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      basicDetails,
-      contactInfo,
-      aboutText,
-      addressInfo,
-      familyInfo,
-      skills: updatedSkills,
-    }));
+  // resume handlers
+  const handleUploadClick = () => document.getElementById("resume-upload")?.click();
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) setUploadedFile(file);
+  };
+  const handleDownload = () => {
+    if (!uploadedFile) return;
+    const url = URL.createObjectURL(uploadedFile);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = uploadedFile.name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
-  const handleSaveBasicDetails = () => {
-    saveToLocalStorage();
-    setEditingBasicDetails(false);
-  };
-
-  const handleSaveContactInfo = () => {
-    saveToLocalStorage();
-    setEditingContactInfo(false);
-  };
-
-  const handleSaveAbout = () => {
-    saveToLocalStorage();
-    setEditingAbout(false);
-  };
-
-  const handleSaveAddress = () => {
-    saveToLocalStorage();
-    setEditingAddress(false);
-  };
-
-  const handleSaveFamily = () => {
-    saveToLocalStorage();
-    setEditingFamily(false);
-  };
-
-  const handleProfessionalDocUpload = (docType: 'relieving' | 'experience') => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.pdf,.doc,.docx';
+  // professional doc upload
+  const handleProfDocUpload = (type: "relieving" | "experience") => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".pdf,.doc,.docx";
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        setProfessionalDocs({ ...professionalDocs, [docType]: file });
-      }
+      if (file) setProfessionalDocs((prev) => ({ ...prev, [type]: file }));
     };
     input.click();
   };
 
+  // skill handlers
+  const handleAddSkill = () => {
+    if (!newSkill.name || !newSkill.percentage) return;
+    const updated = [...skills, newSkill];
+    setSkills(updated);
+    setNewSkill({ name: "", percentage: "" });
+    setShowAddSkill(false);
+    persist({ skills: updated });
+  };
+  const handleRemoveSkill = (i: number) => {
+    const updated = skills.filter((_, idx) => idx !== i);
+    setSkills(updated);
+    persist({ skills: updated });
+  };
+
   return (
     <div className="min-h-screen bg-[#F0F2F5] font-sans">
-      <input
-        type="file"
-        id="resume-upload"
-        className="hidden"
-        onChange={handleFileChange}
-        accept=".pdf,.doc,.docx"
-      />
+      <input id="resume-upload" type="file" className="hidden" onChange={handleFileChange} accept=".pdf,.doc,.docx" />
       <Header title="Profile" />
 
       <div className="flex">
         <Sidebar />
 
-        {/* Main Content - Masonry Layout */}
-        <main className="flex-1 p-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 auto-rows-max">
-            {/* Left Column - Profile Card */}
-            <div className="lg:col-span-1">
+        {/* Masonry: 3 CSS columns */}
+        <main className="flex-1 p-6">
+          <div className="grid grid-cols-3 gap-4 items-start">
+
+            {/* ═══════════ COLUMN 1 ═══════════ */}
+            <div className="flex flex-col gap-4">
+
+              {/* Profile Card */}
               <Card className="overflow-hidden border-none shadow-sm rounded-xl bg-white">
-                <div className="h-24 bg-[#00AEEF]"></div>
-                <div className="px-6 pb-8 -mt-12 flex flex-col items-center text-center">
-                  <Avatar className="h-28 w-28 border-4 border-white shadow-lg mb-4">
-                    <AvatarImage src={profilePhoto || ""} />
-                    <AvatarFallback className="bg-gray-100 text-gray-400 text-4xl">
-                      <User className="h-16 w-16" />
+                <div className="h-20 bg-[#00AEEF]" />
+                <div className="px-6 pb-7 -mt-10 flex flex-col items-center text-center">
+                  <Avatar className="h-24 w-24 border-4 border-white shadow-lg mb-3">
+                    <AvatarFallback className="bg-gray-100 text-gray-400">
+                      <User className="h-14 w-14" />
                     </AvatarFallback>
                   </Avatar>
-                  <h2 className="text-xl font-bold text-gray-900">
+                  <h2 className="text-lg font-bold text-gray-900">
                     {basicDetails.firstName} {basicDetails.lastName}
                   </h2>
-                  <p className="text-[#00AEEF] bg-[#E1F5FE] px-4 py-1 rounded-full text-xs font-semibold mt-2">
+                  <span className="mt-1.5 inline-block bg-[#E1F5FE] text-[#00AEEF] text-xs font-semibold px-3 py-0.5 rounded-full">
                     AI Intern
-                  </p>
+                  </span>
                 </div>
               </Card>
 
               {/* Resume */}
-              <Card className="p-6 border-none shadow-sm rounded-xl flex items-center justify-between bg-white mt-4">
+              <Card className="p-5 border-none shadow-sm rounded-xl bg-white flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-[#E1F5FE] rounded-lg">
-                    <FileText className="h-5 w-5 text-[#00AEEF]" />
+                    <FileText className="h-4 w-4 text-[#00AEEF]" />
                   </div>
-                  <span className="font-semibold text-gray-800">Resume</span>
+                  <span className="font-semibold text-sm text-gray-800">Resume</span>
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]"
-                    onClick={handleUploadClick}
-                  >
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]" onClick={handleUploadClick}>
                     <Upload className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className={cn(
-                      "h-8 w-8 transition-colors",
-                      uploadedFile
-                        ? "text-[#00AEEF] hover:text-[#003B5C]"
-                        : "text-gray-400 cursor-not-allowed",
-                    )}
-                    onClick={handleDownloadClick}
+                    className={cn("h-8 w-8", uploadedFile ? "text-[#00AEEF] hover:text-[#003B5C]" : "text-gray-300 cursor-not-allowed")}
+                    onClick={handleDownload}
                     disabled={!uploadedFile}
                   >
                     <Download className="h-4 w-4" />
                   </Button>
                 </div>
               </Card>
-            </div>
 
-            {/* Middle Column */}
-            <div className="lg:col-span-1">
-              {/* Basic Details */}
-              <Card className="p-6 border-none shadow-sm rounded-xl bg-white">
+              {/* Identification Documents */}
+              <Card className="p-5 border-none shadow-sm rounded-xl bg-white">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-bold text-gray-800">Basic Details</h3>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]"
-                    onClick={() => setEditingBasicDetails(!editingBasicDetails)}
-                  >
-                    <Pencil className="h-4 w-4" />
+                  <h3 className="font-bold text-gray-800 text-sm">Identification Documents</h3>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]" onClick={() => setEditIdDocs(!editIdDocs)}>
+                    <Pencil className="h-3.5 w-3.5" />
                   </Button>
                 </div>
-                {editingBasicDetails ? (
+                {editIdDocs ? (
                   <div className="space-y-3">
-                    <div>
-                      <Label className="text-xs uppercase mb-2 block text-gray-400">Employee ID</Label>
-                      <Input value={basicDetails.employeeId} disabled className="bg-gray-50" />
-                    </div>
-                    <div>
-                      <Label className="text-xs uppercase mb-2 block text-gray-400">First Name</Label>
-                      <Input value={basicDetails.firstName} onChange={(e) => setBasicDetails({...basicDetails, firstName: e.target.value})} />
-                    </div>
-                    <div>
-                      <Label className="text-xs uppercase mb-2 block text-gray-400">Last Name</Label>
-                      <Input value={basicDetails.lastName} onChange={(e) => setBasicDetails({...basicDetails, lastName: e.target.value})} />
-                    </div>
-                    <div>
-                      <Label className="text-xs uppercase mb-2 block text-gray-400">Date of Joining</Label>
-                      <Input type="date" value={basicDetails.dateOfJoining} disabled className="bg-gray-50" />
-                    </div>
-                    <div>
-                      <Label className="text-xs uppercase mb-2 block text-gray-400">Nationality</Label>
-                      <select value={basicDetails.nationality} onChange={(e) => setBasicDetails({...basicDetails, nationality: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF]">
-                        <option>Indian</option>
-                        <option>American</option>
-                        <option>British</option>
-                      </select>
-                    </div>
-                    <div>
-                      <Label className="text-xs uppercase mb-2 block text-gray-400">Religion</Label>
-                      <select value={basicDetails.religion} onChange={(e) => setBasicDetails({...basicDetails, religion: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF]">
-                        <option>Hindu</option>
-                        <option>Muslim</option>
-                        <option>Christian</option>
-                      </select>
-                    </div>
-                    <div>
-                      <Label className="text-xs uppercase mb-2 block text-gray-400">Marital Status</Label>
-                      <select value={basicDetails.maritalStatus} onChange={(e) => setBasicDetails({...basicDetails, maritalStatus: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#00AEEF]">
-                        <option>Single</option>
-                        <option>Married</option>
-                      </select>
-                    </div>
-                    <div className="flex gap-2 pt-2">
-                      <Button size="sm" className="bg-[#00AEEF] hover:bg-[#003B5C] flex-1" onClick={handleSaveBasicDetails}>Save</Button>
-                      <Button size="sm" variant="outline" className="flex-1" onClick={() => setEditingBasicDetails(false)}>Cancel</Button>
+                    <SectionSelect label="National ID Card Type" value={idDocs.nationalIdType || "Aadhaar"} onChange={(v) => setIdDocs({ ...idDocs, nationalIdType: v })} options={["Aadhaar", "PAN", "Voter ID", "Driving License"]} />
+                    <SectionInput label="National ID Upload" value="Read-only" readOnly />
+                    <SectionInput label="National Identity Number" value={idDocs.nationalIdNumber} onChange={(v) => setIdDocs({ ...idDocs, nationalIdNumber: v })} />
+                    <SectionSelect label="Tax Identification Card Type" value={idDocs.taxIdType || "PAN"} onChange={(v) => setIdDocs({ ...idDocs, taxIdType: v })} options={["PAN", "TAN", "GSTIN"]} />
+                    <SectionInput label="Tax ID Upload" value="Read-only" readOnly />
+                    <SectionInput label="Tax Identification Number" value={idDocs.taxIdNumber} onChange={(v) => setIdDocs({ ...idDocs, taxIdNumber: v })} />
+                    <div className="flex gap-2 pt-1">
+                      <Button size="sm" className="bg-[#00AEEF] hover:bg-[#003B5C] flex-1" onClick={() => { persist({ idDocs }); setEditIdDocs(false); }}>Save</Button>
+                      <Button size="sm" variant="outline" className="flex-1" onClick={() => setEditIdDocs(false)}>Cancel</Button>
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-3 text-xs">
+                  <div className="space-y-3">
+                    <FieldRow label="National Identity Card Type" value={idDocs.nationalIdType} />
                     <div>
-                      <p className="text-gray-400 uppercase mb-1">Employee ID</p>
-                      <p className="font-medium text-gray-700">{basicDetails.employeeId}</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">National ID Upload</p>
+                      <p className="text-xs text-gray-400 italic">Read-only</p>
                     </div>
+                    <FieldRow label="National Identity Number" value={idDocs.nationalIdNumber} />
+                    <FieldRow label="Tax Identification Card Type" value={idDocs.taxIdType} />
                     <div>
-                      <p className="text-gray-400 uppercase mb-1">First Name</p>
-                      <p className="font-medium text-gray-700">{basicDetails.firstName}</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Tax ID Upload</p>
+                      <p className="text-xs text-gray-400 italic">Read-only</p>
                     </div>
-                    <div>
-                      <p className="text-gray-400 uppercase mb-1">Last Name</p>
-                      <p className="font-medium text-gray-700">{basicDetails.lastName}</p>
+                    <FieldRow label="Tax Identification Number" value={idDocs.taxIdNumber} />
+                  </div>
+                )}
+              </Card>
+
+              {/* Insurance / Policy Details */}
+              <Card className="p-5 border-none shadow-sm rounded-xl bg-white">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-bold text-gray-800 text-sm">Insurance / Policy Details</h3>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]" onClick={() => setEditInsurance(!editInsurance)}>
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+                {editInsurance ? (
+                  <div className="space-y-3">
+                    <SectionInput label="Policy Number" value={insurance.policyNumber} onChange={(v) => setInsurance({ ...insurance, policyNumber: v })} />
+                    <SectionInput label="Member ID" value={insurance.memberId} onChange={(v) => setInsurance({ ...insurance, memberId: v })} />
+                    <div className="flex gap-2 pt-1">
+                      <Button size="sm" className="bg-[#00AEEF] hover:bg-[#003B5C] flex-1" onClick={() => { persist({ insurance }); setEditInsurance(false); }}>Save</Button>
+                      <Button size="sm" variant="outline" className="flex-1" onClick={() => setEditInsurance(false)}>Cancel</Button>
                     </div>
-                    <div>
-                      <p className="text-gray-400 uppercase mb-1">Date of Joining</p>
-                      <p className="font-medium text-gray-700">{basicDetails.dateOfJoining}</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <FieldRow label="Policy Number" value={insurance.policyNumber} />
+                    <FieldRow label="Member ID" value={insurance.memberId} />
+                  </div>
+                )}
+              </Card>
+
+            </div>
+
+            {/* ═══════════ COLUMN 2 ═══════════ */}
+            <div className="flex flex-col gap-4">
+
+              {/* Basic Details */}
+              <Card className="p-5 border-none shadow-sm rounded-xl bg-white">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-bold text-gray-800 text-sm">Basic Details</h3>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]" onClick={() => setEditBasic(!editBasic)}>
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+                {editBasic ? (
+                  <div className="space-y-3">
+                    <SectionInput label="Employee ID" value={basicDetails.employeeId} disabled />
+                    <SectionInput label="First Name" value={basicDetails.firstName} onChange={(v) => setBasicDetails({ ...basicDetails, firstName: v })} />
+                    <SectionInput label="Last Name" value={basicDetails.lastName} onChange={(v) => setBasicDetails({ ...basicDetails, lastName: v })} />
+                    <SectionInput label="Date of Joining" type="date" value={basicDetails.dateOfJoining} disabled />
+                    <SectionSelect label="Nationality" value={basicDetails.nationality} onChange={(v) => setBasicDetails({ ...basicDetails, nationality: v })} options={["Indian", "American", "British", "Other"]} />
+                    <SectionSelect label="Religion" value={basicDetails.religion} onChange={(v) => setBasicDetails({ ...basicDetails, religion: v })} options={["Hindu", "Muslim", "Christian", "Other"]} />
+                    <SectionSelect label="Marital Status" value={basicDetails.maritalStatus} onChange={(v) => setBasicDetails({ ...basicDetails, maritalStatus: v })} options={["Single", "Married"]} />
+                    <div className="flex gap-2 pt-1">
+                      <Button size="sm" className="bg-[#00AEEF] hover:bg-[#003B5C] flex-1" onClick={() => { persist({ basicDetails }); setEditBasic(false); }}>Save</Button>
+                      <Button size="sm" variant="outline" className="flex-1" onClick={() => setEditBasic(false)}>Cancel</Button>
                     </div>
-                    <div>
-                      <p className="text-gray-400 uppercase mb-1">Nationality</p>
-                      <p className="font-medium text-gray-700">{basicDetails.nationality}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-400 uppercase mb-1">Religion</p>
-                      <p className="font-medium text-gray-700">{basicDetails.religion}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-400 uppercase mb-1">Marital Status</p>
-                      <p className="font-medium text-gray-700">{basicDetails.maritalStatus}</p>
-                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <FieldRow label="Employee ID" value={basicDetails.employeeId} />
+                    <FieldRow label="First Name" value={basicDetails.firstName} />
+                    <FieldRow label="Last Name" value={basicDetails.lastName} />
+                    <FieldRow label="Date of Joining" value={basicDetails.dateOfJoining} />
+                    <FieldRow label="Nationality" value={basicDetails.nationality} />
+                    <FieldRow label="Religion" value={basicDetails.religion} />
+                    <FieldRow label="Marital Status" value={basicDetails.maritalStatus} />
                   </div>
                 )}
               </Card>
 
               {/* Contact Information */}
-              <Card className="p-6 border-none shadow-sm rounded-xl bg-white mt-4">
+              <Card className="p-5 border-none shadow-sm rounded-xl bg-white">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-bold text-gray-800">Contact Information</h3>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]" onClick={() => setEditingContactInfo(!editingContactInfo)}>
-                    <Pencil className="h-4 w-4" />
+                  <h3 className="font-bold text-gray-800 text-sm">Contact Information</h3>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]" onClick={() => setEditContact(!editContact)}>
+                    <Pencil className="h-3.5 w-3.5" />
                   </Button>
                 </div>
-                {editingContactInfo ? (
+                {editContact ? (
                   <div className="space-y-3">
-                    <div>
-                      <Label className="text-xs uppercase mb-2 block text-gray-400">Mobile Number</Label>
-                      <Input value={contactInfo.mobileNumber} onChange={(e) => setContactInfo({...contactInfo, mobileNumber: e.target.value})} />
-                    </div>
-                    <div>
-                      <Label className="text-xs uppercase mb-2 block text-gray-400">Official Email ID</Label>
-                      <Input type="email" value={contactInfo.officialEmail} disabled className="bg-gray-50" />
-                    </div>
-                    <div>
-                      <Label className="text-xs uppercase mb-2 block text-gray-400">Personal Email ID</Label>
-                      <Input type="email" value={contactInfo.personalEmail} onChange={(e) => setContactInfo({...contactInfo, personalEmail: e.target.value})} />
-                    </div>
-                    <div>
-                      <Label className="text-xs uppercase mb-2 block text-gray-400">Emergency Contact</Label>
-                      <Input value={contactInfo.emergencyContact} onChange={(e) => setContactInfo({...contactInfo, emergencyContact: e.target.value})} />
-                    </div>
-                    <div className="flex gap-2 pt-2">
-                      <Button size="sm" className="bg-[#00AEEF] hover:bg-[#003B5C] flex-1" onClick={handleSaveContactInfo}>Save</Button>
-                      <Button size="sm" variant="outline" className="flex-1" onClick={() => setEditingContactInfo(false)}>Cancel</Button>
+                    <SectionInput label="Mobile Number" value={contactInfo.mobileNumber} onChange={(v) => setContactInfo({ ...contactInfo, mobileNumber: v })} />
+                    <SectionInput label="Official Email ID" value={contactInfo.officialEmail} readOnly />
+                    <SectionInput label="Personal Email ID" type="email" value={contactInfo.personalEmail} onChange={(v) => setContactInfo({ ...contactInfo, personalEmail: v })} />
+                    <SectionInput label="Emergency Contact" value={contactInfo.emergencyContact} onChange={(v) => setContactInfo({ ...contactInfo, emergencyContact: v })} />
+                    <div className="flex gap-2 pt-1">
+                      <Button size="sm" className="bg-[#00AEEF] hover:bg-[#003B5C] flex-1" onClick={() => { persist({ contactInfo }); setEditContact(false); }}>Save</Button>
+                      <Button size="sm" variant="outline" className="flex-1" onClick={() => setEditContact(false)}>Cancel</Button>
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-3 text-xs">
-                    <div>
-                      <p className="text-gray-400 uppercase mb-1">Mobile Number</p>
-                      <p className="font-medium text-gray-700">{contactInfo.mobileNumber}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-400 uppercase mb-1">Official Email ID</p>
-                      <p className="font-medium text-gray-700">{contactInfo.officialEmail}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-400 uppercase mb-1">Personal Email ID</p>
-                      <p className="font-medium text-gray-700">{contactInfo.personalEmail}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-400 uppercase mb-1">Emergency Contact</p>
-                      <p className="font-medium text-gray-700">{contactInfo.emergencyContact}</p>
-                    </div>
+                  <div className="space-y-3">
+                    <FieldRow label="Mobile Number" value={contactInfo.mobileNumber} />
+                    <FieldRow label="Official Email ID" value={contactInfo.officialEmail} />
+                    <FieldRow label="Personal Email ID" value={contactInfo.personalEmail} />
+                    <FieldRow label="Emergency Contact" value={contactInfo.emergencyContact} />
                   </div>
                 )}
               </Card>
 
-              {/* About */}
-              <Card className="p-6 border-none shadow-sm rounded-xl bg-white mt-4">
+              {/* About Employee */}
+              <Card className="p-5 border-none shadow-sm rounded-xl bg-white">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-bold text-gray-800">About Employee</h3>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]" onClick={() => setEditingAbout(!editingAbout)}>
-                    <Pencil className="h-4 w-4" />
+                  <h3 className="font-bold text-gray-800 text-sm">About Employee</h3>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]" onClick={() => setEditAbout(!editAbout)}>
+                    <Pencil className="h-3.5 w-3.5" />
                   </Button>
                 </div>
-                {editingAbout ? (
+                {editAbout ? (
                   <div className="space-y-3">
-                    <Textarea value={aboutText} onChange={(e) => setAboutText(e.target.value)} placeholder="Write about yourself..." className="resize-none" />
-                    <Button size="sm" className="bg-[#00AEEF] hover:bg-[#003B5C] w-full" onClick={handleSaveAbout}>Save</Button>
+                    <Textarea value={aboutText} onChange={(e) => setAboutText(e.target.value)} placeholder="Write about yourself..." className="resize-none min-h-[80px]" />
+                    <Button size="sm" className="bg-[#00AEEF] hover:bg-[#003B5C] w-full" onClick={() => { persist({ aboutText }); setEditAbout(false); }}>Save</Button>
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-sm italic">{aboutText || "No information provided yet."}</p>
+                  <p className="text-sm text-gray-500 italic">{aboutText || "No information provided yet."}</p>
                 )}
               </Card>
+
+              {/* Banking Details */}
+              <Card className="p-5 border-none shadow-sm rounded-xl bg-white">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-bold text-gray-800 text-sm">Banking Details</h3>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]" onClick={() => setEditBanking(!editBanking)}>
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+                {editBanking ? (
+                  <div className="space-y-3">
+                    <SectionInput label="Bank Name" value={banking.bankName} onChange={(v) => setBanking({ ...banking, bankName: v })} />
+                    <SectionInput label="Account Number" value={banking.accountNumber} onChange={(v) => setBanking({ ...banking, accountNumber: v })} />
+                    <SectionInput label="IFSC Code" value={banking.ifscCode} onChange={(v) => setBanking({ ...banking, ifscCode: v })} />
+                    <SectionInput label="Branch" value={banking.branch} onChange={(v) => setBanking({ ...banking, branch: v })} />
+                    <div className="flex gap-2 pt-1">
+                      <Button size="sm" className="bg-[#00AEEF] hover:bg-[#003B5C] flex-1" onClick={() => { persist({ banking }); setEditBanking(false); }}>Save</Button>
+                      <Button size="sm" variant="outline" className="flex-1" onClick={() => setEditBanking(false)}>Cancel</Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <FieldRow label="Bank Name" value={banking.bankName} />
+                    <FieldRow label="Account Number" value={banking.accountNumber} />
+                    <FieldRow label="IFSC Code" value={banking.ifscCode} />
+                    <FieldRow label="Branch" value={banking.branch} />
+                  </div>
+                )}
+              </Card>
+
             </div>
 
-            {/* Right Column */}
-            <div className="lg:col-span-1">
-              {/* Address */}
-              <Card className="p-6 border-none shadow-sm rounded-xl bg-white">
+            {/* ═══════════ COLUMN 3 ═══════════ */}
+            <div className="flex flex-col gap-4">
+
+              {/* Address Details */}
+              <Card className="p-5 border-none shadow-sm rounded-xl bg-white">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-bold text-gray-800">Address Details</h3>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]" onClick={() => setEditingAddress(!editingAddress)}>
-                    <Pencil className="h-4 w-4" />
+                  <h3 className="font-bold text-gray-800 text-sm">Address Details</h3>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]" onClick={() => setEditAddress(!editAddress)}>
+                    <Pencil className="h-3.5 w-3.5" />
                   </Button>
                 </div>
-                {editingAddress ? (
+                {editAddress ? (
                   <div className="space-y-3">
-                    <div>
-                      <Label className="text-xs uppercase mb-2 block text-gray-400">Address</Label>
-                      <Input value={addressInfo.address} onChange={(e) => setAddressInfo({...addressInfo, address: e.target.value})} />
-                    </div>
-                    <div>
-                      <Label className="text-xs uppercase mb-2 block text-gray-400">City</Label>
-                      <Input value={addressInfo.city} onChange={(e) => setAddressInfo({...addressInfo, city: e.target.value})} />
-                    </div>
-                    <div>
-                      <Label className="text-xs uppercase mb-2 block text-gray-400">State</Label>
-                      <Input value={addressInfo.state} onChange={(e) => setAddressInfo({...addressInfo, state: e.target.value})} />
-                    </div>
-                    <div>
-                      <Label className="text-xs uppercase mb-2 block text-gray-400">Pincode</Label>
-                      <Input value={addressInfo.pincode} onChange={(e) => setAddressInfo({...addressInfo, pincode: e.target.value})} />
-                    </div>
-                    <div>
-                      <Label className="text-xs uppercase mb-2 block text-gray-400">Country</Label>
-                      <Input value={addressInfo.country} onChange={(e) => setAddressInfo({...addressInfo, country: e.target.value})} />
-                    </div>
-                    <div>
-                      <Label className="text-xs uppercase mb-2 block text-gray-400">Work Location</Label>
-                      <Input value={addressInfo.workLocation} onChange={(e) => setAddressInfo({...addressInfo, workLocation: e.target.value})} />
-                    </div>
-                    <Button size="sm" className="bg-[#00AEEF] hover:bg-[#003B5C] w-full" onClick={handleSaveAddress}>Save</Button>
+                    <SectionInput label="Address" value={addressInfo.address} onChange={(v) => setAddressInfo({ ...addressInfo, address: v })} />
+                    <SectionInput label="City" value={addressInfo.city} onChange={(v) => setAddressInfo({ ...addressInfo, city: v })} />
+                    <SectionInput label="State" value={addressInfo.state} onChange={(v) => setAddressInfo({ ...addressInfo, state: v })} />
+                    <SectionInput label="Pincode" value={addressInfo.pincode} onChange={(v) => setAddressInfo({ ...addressInfo, pincode: v })} />
+                    <SectionInput label="Country" value={addressInfo.country} onChange={(v) => setAddressInfo({ ...addressInfo, country: v })} />
+                    <SectionInput label="Work Location" value={addressInfo.workLocation} onChange={(v) => setAddressInfo({ ...addressInfo, workLocation: v })} />
+                    <Button size="sm" className="bg-[#00AEEF] hover:bg-[#003B5C] w-full" onClick={() => { persist({ addressInfo }); setEditAddress(false); }}>Save</Button>
                   </div>
                 ) : (
-                  <div className="space-y-3 text-xs">
-                    <div>
-                      <p className="text-gray-400 uppercase mb-1">Address</p>
-                      <p className="font-medium text-gray-700">{addressInfo.address}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-400 uppercase mb-1">City</p>
-                      <p className="font-medium text-gray-700">{addressInfo.city}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-400 uppercase mb-1">State</p>
-                      <p className="font-medium text-gray-700">{addressInfo.state}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-400 uppercase mb-1">Pincode</p>
-                      <p className="font-medium text-gray-700">{addressInfo.pincode}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-400 uppercase mb-1">Country</p>
-                      <p className="font-medium text-gray-700">{addressInfo.country}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-400 uppercase mb-1">Work Location</p>
-                      <p className="font-medium text-gray-700">{addressInfo.workLocation}</p>
-                    </div>
+                  <div className="space-y-3">
+                    <FieldRow label="Address" value={addressInfo.address} />
+                    <FieldRow label="City" value={addressInfo.city} />
+                    <FieldRow label="State" value={addressInfo.state} />
+                    <FieldRow label="Pincode" value={addressInfo.pincode} />
+                    <FieldRow label="Country" value={addressInfo.country} />
+                    <FieldRow label="Work Location" value={addressInfo.workLocation} />
                   </div>
                 )}
               </Card>
 
-              {/* Skills */}
-              <Card className="p-6 border-none shadow-sm rounded-xl bg-white mt-4">
+              {/* Skills & Expertise */}
+              <Card className="p-5 border-none shadow-sm rounded-xl bg-white">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-bold text-gray-800">Skills & Expertise</h3>
-                  <Button size="sm" className="bg-[#00AEEF] hover:bg-[#003B5C] h-8 gap-1" onClick={() => setShowAddSkill(!showAddSkill)}>
-                    <Plus className="h-3.5 w-3.5" /> Add
+                  <h3 className="font-bold text-gray-800 text-sm">Skills & Expertise</h3>
+                  <Button size="sm" className="bg-[#00AEEF] hover:bg-[#003B5C] h-7 text-xs gap-1 px-2" onClick={() => setShowAddSkill(!showAddSkill)}>
+                    <Plus className="h-3 w-3" /> Add
                   </Button>
                 </div>
-                
                 {showAddSkill && (
-                  <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="space-y-3 mb-3">
-                      <div>
-                        <Label className="text-xs uppercase mb-2 block text-gray-400">Skill Name</Label>
-                        <Input value={newSkill.name} onChange={(e) => setNewSkill({...newSkill, name: e.target.value})} placeholder="e.g., JavaScript" />
-                      </div>
-                      <div>
-                        <Label className="text-xs uppercase mb-2 block text-gray-400">Percentage</Label>
-                        <Input type="number" min="0" max="100" value={newSkill.percentage} onChange={(e) => setNewSkill({...newSkill, percentage: e.target.value})} placeholder="0-100" />
-                      </div>
-                    </div>
+                  <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2">
+                    <SectionInput label="Skill Name" value={newSkill.name} onChange={(v) => setNewSkill({ ...newSkill, name: v })} />
+                    <SectionInput label="Proficiency (%)" type="number" value={newSkill.percentage} onChange={(v) => setNewSkill({ ...newSkill, percentage: v })} />
                     <div className="flex gap-2">
-                      <Button size="sm" className="bg-[#00AEEF] hover:bg-[#003B5C] flex-1" onClick={handleAddSkill}>Add Skill</Button>
+                      <Button size="sm" className="bg-[#00AEEF] hover:bg-[#003B5C] flex-1" onClick={handleAddSkill}>Add</Button>
                       <Button size="sm" variant="outline" className="flex-1" onClick={() => setShowAddSkill(false)}>Cancel</Button>
                     </div>
                   </div>
                 )}
-
                 <div className="space-y-2">
                   {skills.length === 0 ? (
-                    <p className="text-gray-400 text-sm">No skills added yet</p>
+                    <p className="text-sm text-gray-400">No skills added yet.</p>
                   ) : (
-                    skills.map((skill, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-700">{skill.name}</p>
-                          <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                            <div className="bg-[#00AEEF] h-2 rounded-full" style={{ width: `${skill.percentage}%` }}></div>
+                    skills.map((skill, i) => (
+                      <div key={i} className="flex items-center gap-2 p-2.5 bg-gray-50 rounded-lg">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-700 truncate">{skill.name}</p>
+                          <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                            <div className="bg-[#00AEEF] h-1.5 rounded-full" style={{ width: `${Math.min(+skill.percentage, 100)}%` }} />
                           </div>
-                          <p className="text-xs text-gray-500 mt-1">{skill.percentage}%</p>
+                          <p className="text-[10px] text-gray-400 mt-0.5">{skill.percentage}%</p>
                         </div>
-                        <button onClick={() => handleRemoveSkill(index)} className="ml-2 p-1 hover:bg-gray-200 rounded transition-colors">
-                          <X className="h-4 w-4 text-gray-400 hover:text-red-600" />
+                        <button onClick={() => handleRemoveSkill(i)} className="p-1 hover:bg-gray-200 rounded flex-shrink-0">
+                          <X className="h-3.5 w-3.5 text-gray-400 hover:text-red-500" />
                         </button>
                       </div>
                     ))
@@ -550,80 +562,127 @@ export default function ProfilePage() {
               </Card>
 
               {/* Professional Documents */}
-              <Card className="p-6 border-none shadow-sm rounded-xl bg-white mt-4">
-                <h3 className="font-bold text-gray-800 mb-4">Professional Documents</h3>
+              <Card className="p-5 border-none shadow-sm rounded-xl bg-white">
+                <h3 className="font-bold text-gray-800 text-sm mb-4">Professional Documents</h3>
                 <div className="space-y-4">
-                  <div>
-                    <Label className="text-xs uppercase mb-2 block text-gray-400">Relieving Certificate</Label>
-                    <button onClick={() => handleProfessionalDocUpload('relieving')} className="w-full p-3 border border-dashed border-gray-300 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors text-gray-500">
-                      <Upload className="h-4 w-4" />
-                      <span className="text-sm">{professionalDocs.relieving ? 'Replace File' : 'Upload'}</span>
-                    </button>
-                    {professionalDocs.relieving && <p className="text-xs text-green-600 mt-1">✓ {professionalDocs.relieving.name}</p>}
-                  </div>
-                  <div>
-                    <Label className="text-xs uppercase mb-2 block text-gray-400">Experience Certificate</Label>
-                    <button onClick={() => handleProfessionalDocUpload('experience')} className="w-full p-3 border border-dashed border-gray-300 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors text-gray-500">
-                      <Upload className="h-4 w-4" />
-                      <span className="text-sm">{professionalDocs.experience ? 'Replace File' : 'Upload'}</span>
-                    </button>
-                    {professionalDocs.experience && <p className="text-xs text-green-600 mt-1">✓ {professionalDocs.experience.name}</p>}
-                  </div>
+                  {(["relieving", "experience"] as const).map((type) => (
+                    <div key={type}>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1.5">
+                        {type === "relieving" ? "Relieving Certificate" : "Experience Certificate"}
+                      </p>
+                      <button
+                        onClick={() => handleProfDocUpload(type)}
+                        className="w-full py-2.5 border border-dashed border-gray-300 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors text-gray-500"
+                      >
+                        <Upload className="h-3.5 w-3.5" />
+                        <span className="text-xs">{professionalDocs[type] ? "Replace File" : "Upload"}</span>
+                      </button>
+                      {professionalDocs[type] && (
+                        <p className="text-[10px] text-green-600 mt-1">✓ {professionalDocs[type]!.name}</p>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </Card>
 
               {/* Family Information */}
-              <Card className="p-6 border-none shadow-sm rounded-xl bg-white mt-4">
+              <Card className="p-5 border-none shadow-sm rounded-xl bg-white">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-bold text-gray-800">Family Information</h3>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]" onClick={() => setEditingFamily(!editingFamily)}>
-                    <Pencil className="h-4 w-4" />
+                  <h3 className="font-bold text-gray-800 text-sm">Family Information</h3>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]" onClick={() => setEditFamily(!editFamily)}>
+                    <Pencil className="h-3.5 w-3.5" />
                   </Button>
                 </div>
-                {editingFamily ? (
+                {editFamily ? (
                   <div className="space-y-3">
-                    <div>
-                      <Label className="text-xs uppercase mb-2 block text-gray-400">Spouse Name</Label>
-                      <Input value={familyInfo.spouseName} onChange={(e) => setFamilyInfo({...familyInfo, spouseName: e.target.value})} />
-                    </div>
-                    <div>
-                      <Label className="text-xs uppercase mb-2 block text-gray-400">Spouse Employment Role</Label>
-                      <Input value={familyInfo.spouseRole} onChange={(e) => setFamilyInfo({...familyInfo, spouseRole: e.target.value})} />
-                    </div>
-                    <div>
-                      <Label className="text-xs uppercase mb-2 block text-gray-400">Spouse Organization</Label>
-                      <Input value={familyInfo.spouseOrganization} onChange={(e) => setFamilyInfo({...familyInfo, spouseOrganization: e.target.value})} />
-                    </div>
-                    <div>
-                      <Label className="text-xs uppercase mb-2 block text-gray-400">Number of Children</Label>
-                      <Input type="number" min="0" value={familyInfo.numberOfChildren} onChange={(e) => setFamilyInfo({...familyInfo, numberOfChildren: e.target.value})} />
-                    </div>
-                    <div className="flex gap-2 pt-2">
-                      <Button size="sm" className="bg-[#00AEEF] hover:bg-[#003B5C] flex-1" onClick={handleSaveFamily}>Save</Button>
-                      <Button size="sm" variant="outline" className="flex-1" onClick={() => setEditingFamily(false)}>Cancel</Button>
+                    <SectionInput label="Spouse Name" value={familyInfo.spouseName} onChange={(v) => setFamilyInfo({ ...familyInfo, spouseName: v })} />
+                    <SectionInput label="Spouse Employment Role" value={familyInfo.spouseRole} onChange={(v) => setFamilyInfo({ ...familyInfo, spouseRole: v })} />
+                    <SectionInput label="Spouse Organization" value={familyInfo.spouseOrganization} onChange={(v) => setFamilyInfo({ ...familyInfo, spouseOrganization: v })} />
+                    <SectionInput label="Number of Children" type="number" value={familyInfo.numberOfChildren} onChange={(v) => setFamilyInfo({ ...familyInfo, numberOfChildren: v })} />
+                    <div className="flex gap-2 pt-1">
+                      <Button size="sm" className="bg-[#00AEEF] hover:bg-[#003B5C] flex-1" onClick={() => { persist({ familyInfo }); setEditFamily(false); }}>Save</Button>
+                      <Button size="sm" variant="outline" className="flex-1" onClick={() => setEditFamily(false)}>Cancel</Button>
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-3 text-xs">
-                    <div>
-                      <p className="text-gray-400 uppercase mb-1">Spouse Name</p>
-                      <p className="font-medium text-gray-700">{familyInfo.spouseName || "-"}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-400 uppercase mb-1">Spouse Employment Role</p>
-                      <p className="font-medium text-gray-700">{familyInfo.spouseRole || "-"}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-400 uppercase mb-1">Spouse Organization</p>
-                      <p className="font-medium text-gray-700">{familyInfo.spouseOrganization || "-"}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-400 uppercase mb-1">Number of Children</p>
-                      <p className="font-medium text-gray-700">{familyInfo.numberOfChildren || "-"}</p>
-                    </div>
+                  <div className="space-y-3">
+                    <FieldRow label="Spouse Name" value={familyInfo.spouseName} />
+                    <FieldRow label="Spouse Employment Role" value={familyInfo.spouseRole} />
+                    <FieldRow label="Spouse Organization" value={familyInfo.spouseOrganization} />
+                    <FieldRow label="Number of Children" value={familyInfo.numberOfChildren} />
                   </div>
                 )}
               </Card>
+
+              {/* Passport Details */}
+              <Card className="p-5 border-none shadow-sm rounded-xl bg-white">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-bold text-gray-800 text-sm">Passport Details</h3>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]" onClick={() => setEditPassport(!editPassport)}>
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+                {editPassport ? (
+                  <div className="space-y-3">
+                    <SectionSelect label="Do you have passport?" value={passport.hasPassport} onChange={(v) => setPassport({ ...passport, hasPassport: v })} options={["No", "Yes"]} />
+                    {passport.hasPassport === "Yes" && (
+                      <>
+                        <SectionInput label="Passport Number" value={passport.passportNumber} onChange={(v) => setPassport({ ...passport, passportNumber: v })} />
+                        <SectionInput label="Passport Expiry" type="date" value={passport.passportExpiry} onChange={(v) => setPassport({ ...passport, passportExpiry: v })} />
+                      </>
+                    )}
+                    <div className="flex gap-2 pt-1">
+                      <Button size="sm" className="bg-[#00AEEF] hover:bg-[#003B5C] flex-1" onClick={() => { persist({ passport }); setEditPassport(false); }}>Save</Button>
+                      <Button size="sm" variant="outline" className="flex-1" onClick={() => setEditPassport(false)}>Cancel</Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <FieldRow label="Do you have passport?" value={passport.hasPassport} />
+                    {passport.hasPassport === "Yes" && (
+                      <>
+                        <FieldRow label="Passport Number" value={passport.passportNumber} />
+                        <FieldRow label="Passport Expiry" value={passport.passportExpiry} />
+                      </>
+                    )}
+                  </div>
+                )}
+              </Card>
+
+              {/* Education Documents */}
+              <Card className="p-5 border-none shadow-sm rounded-xl bg-white">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-bold text-gray-800 text-sm">Education Documents</h3>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#00AEEF]" onClick={() => setEditEducation(!editEducation)}>
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+                {editEducation ? (
+                  <div className="space-y-3">
+                    <SectionSelect
+                      label="Highest Level of Education"
+                      value={education.highestLevel || "Select"}
+                      onChange={(v) => setEducation({ ...education, highestLevel: v })}
+                      options={["Select", "High School", "Diploma", "Bachelor's", "Master's", "PhD", "Other"]}
+                    />
+                    <SectionInput label="Institution" value={education.institution} onChange={(v) => setEducation({ ...education, institution: v })} />
+                    <SectionInput label="Year of Passing" type="number" value={education.yearOfPassing} onChange={(v) => setEducation({ ...education, yearOfPassing: v })} />
+                    <SectionInput label="Specialization" value={education.specialization} onChange={(v) => setEducation({ ...education, specialization: v })} />
+                    <div className="flex gap-2 pt-1">
+                      <Button size="sm" className="bg-[#00AEEF] hover:bg-[#003B5C] flex-1" onClick={() => { persist({ education }); setEditEducation(false); }}>Save</Button>
+                      <Button size="sm" variant="outline" className="flex-1" onClick={() => setEditEducation(false)}>Cancel</Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <FieldRow label="Highest Level of Education" value={education.highestLevel} />
+                    <FieldRow label="Institution" value={education.institution} />
+                    <FieldRow label="Year of Passing" value={education.yearOfPassing} />
+                    <FieldRow label="Specialization" value={education.specialization} />
+                  </div>
+                )}
+              </Card>
+
             </div>
           </div>
         </main>
